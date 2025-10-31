@@ -8,7 +8,8 @@ Version: 1.0.0
 
 | Version number | Change |
 | :------------: | :----: |
-|                |        |
+| 1.0.0 | Initial release |
+| 2.0.0 | Added first drafts for business model, stakeholders, interfaces and FR| 
 
 # Contents
 
@@ -53,31 +54,34 @@ Consider that the document should be delivered to another team (unknown to you)
  which will be in charge of designing and implementing the system. The design team should be able to proceed only with the information in the document.
 
 # Business Model
+EZShop will cost a monthly fee of x euros/month. The product won't contain advertising and will be inaccessible if the monthly fee is not paid for the current month
 
 # Stakeholders
 
 | Stakeholder name | Description |
 | :--------------: | :---------: |
-| Stakeholder x..  |             |
+| Developers  | EZShop developers, in charge of developing and maintaining the product  |
+| Shop owner | owner of the shop, who is the one choosing to adopt EZShop for his business |
+| End user  | individual who directly interacts with the software, often a sale manager of some kind |
+| IT administrator | he who manages the IT infrastructure of the shop and is in charge of locally deploying EZShop |
+| Cash register software  | responsible for exchanging data with EzShop to record product sales |
+| Payment service | used **only**  to pay the monthly fee | 
+| Accounting software | possible other software present in the business with whom EZShop will need to interact |
 
 # Context Diagram and interfaces
 
 ## Context Diagram
-
-\<Define here Context diagram using UML use case diagram>
-
-\<actors are a subset of stakeholders>
+#TODO Already done, need to be inserted by Andrei 
 
 ## Interfaces
 
 \<describe here each interface in the context diagram>
-
-
 |   Actor   | Logical Interface | Physical Interface |
 | :-------: | :---------------: | :----------------: |
-| Actor x.. |                   |                    |
-
-
+| End user |  EZShop GUI  | laptop or desktop |
+| Cash register software | register software APIs | internet connection |
+| Payment service | credit card circuit | internete connection |
+| Accounting software | standardized product data exhange APIs | internet connection |
 # Functional and non functional requirements
 
 ## Functional Requirements
@@ -88,9 +92,23 @@ Consider that the document should be delivered to another team (unknown to you)
 
 |  ID   | Description |
 | :---: | :---------: |
-|  FR1  |             |
-|  FR2  |             |
-| FRx.. |             |
+|FR1: Manage sales  | 1.1 Insert, read, update, delete sales records|
+|                   | 1.2 Refund a product.|
+|FR2: Manage inventory  | 2.1 Insert, read, update, delete inventory records
+|                       | 2.2 Notification when stock is low|
+|FR3: Manage orders to suppliers | 3.1 Insert, read, update, delete inventory records|
+|                                | 3.2 Managing communications with suppliers |
+|                                | 3.3 EZShop is able to send email to a specified email address|
+|                                | 3.4 Automatically insert a record for an order when email is sent|
+|FR4: Data visualization| 4.1 Sisplay charts overview about stored data|
+|| 4.2 Filtering by category, time sold etc|
+|| 4.3 Computes profits, expenses, taxes|
+|| 4.4 Real time sync with database tables|
+|FR5: Authentication and autorization process| 5.1 Login with email and password|
+||5.1 Check if a subscription is active;
+||5.2 Prompt to pay the subscription if it is not active;
+|FR6: Exchange data with other software products|6.1 EZShop is able to access a local network to exchange data with other devices|
+|| 6.2 Usage of an already established format to exchange standardized product data between software components|
 
 ## Non Functional Requirements
 
