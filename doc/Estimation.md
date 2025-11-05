@@ -34,6 +34,8 @@ Consider the EZShop project as described in your requirements document, assume t
 |                      |                                 |
 |                      |                                 |
 
+Estimated duration: (calendar time)
+
 # Estimate by activity decomposition
 
 ###
@@ -44,13 +46,14 @@ Consider the EZShop project as described in your requirements document, assume t
 
 ###
 
-Insert here Gantt chart with above activities
+## Gantt chart
+Insert here Gantt chart
 
 # Summary
 
 Report here the results of the three estimation approaches. The estimates may differ. Discuss here the possible reasons for the difference
 
-|                                    | Estimated effort | Estimated duration |
+|                                    | Estimated effort (ph) | Estimated duration (calendar time, relative)|
 | ---------------------------------- | ---------------- | ------------------ |
 | estimate by size                   |                  |                    |
 | estimate by product decomposition  |                  |                    |
