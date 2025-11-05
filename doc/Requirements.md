@@ -74,8 +74,6 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 ## Context Diagram
 ![Context Diagram](media/context-diagram-ezshop.jpg)
-#TODO add account manager to context diagram
-#TODO add supplier
 
 
 ## Interfaces
