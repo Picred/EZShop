@@ -44,10 +44,14 @@ Estimated duration: (calendar time)
 | ------------- | ------------------------------- |
 |               |                                 |
 
+
+
 ###
 
 ## Gantt chart
 Insert here Gantt chart
+
+Estimated duration: (calendar time)
 
 # Summary
 
