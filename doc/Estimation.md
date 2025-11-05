@@ -36,10 +36,10 @@ Consider the EZShop project as described in your requirements document, assume t
 
 Estimated duration: (calendar time)
 
-# Estimate by activity decomposition
+# Estimate by activity decomposition + Gantt chart
 
 ###
-
+step 1: activities (WBS), step 2 Gantt chart
 | Activity name | Estimated effort (person hours) |
 | ------------- | ------------------------------- |
 |               |                                 |
