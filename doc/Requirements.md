@@ -61,9 +61,10 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | Stakeholder name       | Description                                                                                      |
 | :--------------------: | :----------------------------------------------------------------------------------------------: |
 | Developers             | EZShop developers, in charge of developing and maintaining the product                           |
+| Account manager        | Person who manges shop accounts, login informations and active subscriptions                     |
 | Shop owner             | owner of the shop, who is the one choosing to adopt EZShop for his business                      |
 | End user               | individual who directly interacts with the software, often a sale manager of some kind           |
-| IT administrator       | he who manages the IT infrastructure of the shop and is in charge of locally deploying EZShop    |
+| Supplier               | company who supplies the shop with products of various nature                                    |
 | Cash register software | responsible for exchanging data with EzShop to record product sales                              |
 | Payment service        | used **only**  to pay the monthly fee                                                            |
 | Accounting software    | possible other software present in the business with whom EZShop will need to interact           |
@@ -73,6 +74,8 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 ## Context Diagram
 ![Context Diagram](media/context-diagram-ezshop.jpg)
+#TODO add account manager to context diagram
+#TODO add supplier
 
 
 ## Interfaces
@@ -81,6 +84,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |   Actor   | Logical Interface | Physical Interface |
 | :-------: | :---------------: | :----------------: |
 | End user |  EZShop GUI  | laptop or desktop |
+| Account manager |  EZShop GUI  | laptop or desktop |
 | Cash register software | register software APIs | internet connection |
 | Payment service | credit card circuit | internete connection |
 | Accounting software | standardized product data exhange APIs | internet connection |
@@ -94,21 +98,23 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 |  ID   | Description |
 | :---: | :---------: |
-|FR1: Manage sales  | 1.1 Insert, read, update, delete sales records|
-|                   | 1.2 Refund a product.|
-|FR2: Manage inventory  | 2.1 Insert, read, update, delete inventory records
-|                       | 2.2 Notification when stock is low|
-|FR3: Manage orders to suppliers | 3.1 Insert, read, update, delete inventory records|
-|                                | 3.2 Managing communications with suppliers |
-|                                | 3.3 EZShop is able to send email to a specified email address|
-|                                | 3.4 Automatically insert a record for an order when email is sent|
-|FR4: Data visualization| 4.1 Sisplay charts overview about stored data|
-|| 4.2 Filtering by category, time sold etc|
+|FR1: Manage sales  | 1.1 Insert, read, update, delete sales records |
+|                   | 1.2 Refund a product |
+|FR2: Manage inventory  | 2.1 Insert, read, update, delete inventory records |
+|                       | 2.2 Notification when stock is low |
+|FR3: Manage orders to suppliers | 3.1 Insert, read, update, delete suppliers contacts |
+|                                | 3.2 Create a new purchase order from a given supplier, specifying products and amounts |
+|                                | 3.3 EZShop is able to send email to a supplier after the creation of a new order |
+|                                | 3.4 Automatically insert a record for an order when email is sent |
+|                                | 3.5 Function to mark an order as completed and adding received products to inventory table |
+|FR4: Data visualization| 4.1 Display charts overview about stored data |
+|| 4.2 Filtering by category, time range, etc |
 || 4.3 Computes profits, expenses, taxes|
 || 4.4 Real time sync with database tables|
 |FR5: Authentication and autorization process| 5.1 Login with email and password|
-||5.1 Check if a subscription is active;
-||5.2 Prompt to pay the subscription if it is not active;
+||5.1 Check if a subscription is active|
+||5.2 Prompt to pay the subscription if it is not active|
+||5.3 Create a new account for a shop|
 |FR6: Exchange data with other software products|6.1 EZShop is able to access a local network to exchange data with other devices|
 || 6.2 Usage of an already established format to exchange standardized product data between software components|
 
@@ -118,25 +124,33 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 |   ID    | Type (efficiency, reliability, ..) | Description | Refers to |
 | :-----: | :--------------------------------: | :---------: | :-------: |
-|  NFR1   |                                    |             |           |
-|  NFR2   |                                    |             |           |
-|  NFR3   |                                    |             |           |
-| NFRx .. |                                    |             |           |
+|  NFR1   | Portability                        | The application is targeting desktop platforms and to reduce porting work, a cross platform framework will be used to support Windows, Mac Os and Linux environments |        |
+|  NFR2   | Performance                        | Query return time should be less than 3 seconds |           |
+|  NFR3   | Performance                        | Synchronization with local tables should happen every minute and should take less than 5 seconds |           |
+|  NFR4   | Maintainability                    | Codebase should be structured in distinct modules that can be easily maintained and updated |           |
+|  NFR5   | Security                           | Each account needs to have 2FA enabled | FR5 |
+|  NFR6   | Usability                          | Adult between 18 and 70 years old accustomed to using desktop softwares, average education level (ex total 13 years in school). Users should be able to use application without training in less than 5 minutes|  |
 
 # Table of rights
 
-|  Actor   | FR1         | FRx |
-| :---:    | :---------: | :---: |
-|          |             |       |
+|  Actor   | FR1         | FR2 | FR3 | FR4 | FR5 | FR6 |
+| :---:    | :---------: | :---: | :---: | :---: | :---: | :---: |
+| end user | y | y | y | y | n | n |
+| account manager | n | n | n | n | y | n |
+
 
 # Use case diagram and use cases
 
 ## Use case brief
 |  UC name   | Goal         | Description |
 | :---:    | :---------: | :---: |
-|          |             |       |
-
-
+| Account creation | activate a new account for a shop | main actor: Account manager - The account manager inserts the requested credentials in the EZShop account database |
+| Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
+| Payment of the subscription | activate the subscription for the selected account | main actor: shop owner - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
+| Register a new product | registration of a product that is being sold at the shop | main actor: end user, cash register - A new product can be inserted in the product database both manually (by the end user) and automatically at the time of sale thanks to the ability to exchange data with the cash register system |
+| Record a new sale | record a sale | main actor: end user, cash register - A new sale can be inserted in the sale database both manually (by the end user) and automatically thanks to the ability to exchange data with the cash register system |
+| Record a refund | record a refund | main actor: end user, cash register - A customer can decide to ask for a refund of a previously sold product. This operation can be both managed by the cash register system as well as the end user|
+#TODO finish uc brief
 
 ## Use case diagram
 
