@@ -61,13 +61,14 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | Stakeholder name       | Description                                                                                      |
 | :--------------------: | :----------------------------------------------------------------------------------------------: |
 | Developers             | EZShop developers, in charge of developing and maintaining the product                           |
-| Account manager        | Person who manges shop accounts, login informations and active subscriptions                     |
 | Shop owner             | owner of the shop, who is the one choosing to adopt EZShop for his business                      |
 | End user               | individual who directly interacts with the software, often a sale manager of some kind           |
 | Supplier               | company who supplies the shop with products of various nature                                    |
 | Cash register software | responsible for exchanging data with EzShop to record product sales                              |
 | Payment service        | used **only**  to pay the monthly fee                                                            |
 | Accounting software    | possible other software present in the business with whom EZShop will need to interact           |
+
+#TODO is differentiating shop owner and end user actually useful in the case od a small shop?
 
 
 # Context Diagram and interfaces
@@ -135,7 +136,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | :---:    | :---------: | :---: | :---: | :---: | :---: | :---: |
 | end user | y | y | y | y | n | n |
 | account manager | n | n | n | n | y | n |
-
+#TODO ask if we have to add each FR
 
 # Use case diagram and use cases
 
@@ -143,19 +144,26 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |  UC name   | Goal         | Description |
 | :---:    | :---------: | :---: |
 | Account creation | activate a new account for a shop | main actor: Account manager - The account manager inserts the requested credentials in the EZShop account database |
+| Payment of the subscription | activate the subscription for the selected account | main actor: shop owner, payment service - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
+| account activation | having access to EZShop | main actor: end user - after paying the subscription fee through the payment service, the end user can use every features of application |
 | Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
-| Payment of the subscription | activate the subscription for the selected account | main actor: shop owner - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
+| Logout process | sign out from the currently signed in account | main actor: end user - the user is able to log out and lose access to EZShop features |
 | Register a new product | registration of a product that is being sold at the shop | main actor: end user, cash register - A new product can be inserted in the product database both manually (by the end user) and automatically at the time of sale thanks to the ability to exchange data with the cash register system |
 | Record a new sale | record a sale | main actor: end user, cash register - A new sale can be inserted in the sale database both manually (by the end user) and automatically thanks to the ability to exchange data with the cash register system |
-| Record a refund | record a refund | main actor: end user, cash register - A customer can decide to ask for a refund of a previously sold product. This operation can be both managed by the cash register system as well as the end user|
-#TODO finish uc brief
+| Record a refund | record a refund | main actor: end user, cash register - A customer can decide to ask for a refund of a previously sold product. This operation can be both managed by the cash register system as well as the end user |
+| Manage supplier contacts | Create and keep supplier information up to date | main actor: end user - The end user can add, edit, or delete supplier contact details. Supplier data is stored in a dedicated database table for use when creating purchase orders |
+| Submit a new purchase order | Generate a new purchase order to restock items | main actor: end user, supplier - The end user selects a supplier and specifies the products and quantities needed. The system generates a purchase order document and stores it in the database. The system automatically sends an email to the supplier |
+| Mark an order as completed | end the order procedure | main actor: end user - when one order is delivered, the end user marks it as completed |
+| Update inventory | update inventory | main actor: end user - end user can change manually the amounts of products in stock |
+| visualization of data | show charts, aggregating data | main actor: end user - end user can filter the data as desired |
+
 
 ## Use case diagram
 
 \<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
 
 \<next describe here each use case in the UCD>
-
+#TODO change sing out with logout
 ### Use case 1, UC1
 
 | Actors Involved  |                                                                      |
