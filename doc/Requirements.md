@@ -82,10 +82,10 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 \<describe here each interface in the context diagram>
 |   Actor   | Logical Interface | Physical Interface |
 | :-------: | :---------------: | :----------------: |
-| End user               |        EZShop GUI      | laptop or desktop   |
-| Cash register software | Register software APIs | internet connection |
-| Payment service        | Credit card circuit    | internet connection |
-| Accounting software    | Standardized product data exhange APIs | internet connection |
+| End user               |        EZShop GUI      | laptop or desktop computer (display, keyboard, mouse)   |
+| Cash register software (Sqaure POS) | RESTful API (or similar, e.g., GraphQL) exchanging JSON | internet connection (WAN) |
+| Payment service        | Payment gateway's API or a secure, hosted payment webpage | internet connection (HTTPS) |
+| Accounting software    | file-based export/import (e.g., CSV or XML format). | internet connection |
 # Functional and non functional requirements
 
 ## Functional Requirements
@@ -113,7 +113,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |                                |5.1 Check if a subscription is active |
 |                                |5.2 Prompt to pay the subscription if it is not active |
 |                                |5.3 Create a new account for a shop |
-|FR6: Exchange data with other software products|6.1 EZShop is able to access a local network to exchange data with other devices |
+|FR6: Exchange data with other software products|6.1 Connect to the internet (via HTTPS) to exchange data with external cloud-based services (e.g., POS system, payment services) |
 |                                | 6.2 Usage of an already established format to exchange standardized product data between software components |
 
 ## Non Functional Requirements
