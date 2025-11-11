@@ -74,7 +74,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 # Context Diagram and interfaces
 
 ## Context Diagram
-![Context Diagram](media/context-diagram-ezshop.jpg)
+![Context Diagram](media/context-diagram-ezshop.png)
 
 
 ## Interfaces
@@ -143,7 +143,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 ## Use case brief
 |  UC name   | Goal         | Description |
 | :---:    | :---------: | :---: |
-| Account creation | activate a new account for a shop | main actor: Account manager - The account manager inserts the requested credentials in the EZShop account database |
+| Account creation | activate a new account for a shop | main actor: end user - The account manager inserts the requested credentials in the EZShop account database |
 | Payment of the subscription | activate the subscription for the selected account | main actor: shop owner, payment service - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
 | account activation | having access to EZShop | main actor: end user - after paying the subscription fee through the payment service, the end user can use every features of application |
 | Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
@@ -162,8 +162,12 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 \<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
 
+![Use Case Diagram](media/uc_diagram_ezshop.png)
+
+
 \<next describe here each use case in the UCD>
-#TODO change sing out with logout
+
+
 ### Use case 1, UC1
 
 | Actors Involved  |                                                                      |
