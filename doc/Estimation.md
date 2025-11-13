@@ -14,12 +14,12 @@ Consider the EZShop project as described in your requirements document, assume t
 
 |                                                                                                         | Estimate |
 | ------------------------------------------------------------------------------------------------------- | -------- |
-| NC = Estimated number of classes to be developed                                                        |          |
-| A = Estimated average size per class, in LOC                                                            |          |
-| S = Estimated size of project, in LOC (= NC \* A)                                                       |          |
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                    |          |
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                     |          |
-| Estimated calendar time, in calendar weeks (Assume team of 5 people, 8 hours per day, 5 days per week ) |          |
+| NC = Estimated number of classes to be developed                                                        |     9    |
+| A = Estimated average size per class, in LOC                                                            |     600     |
+| S = Estimated size of project, in LOC (= NC \* A)                                                       |      5400    |
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                    |    540 ph     |
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                     |    16,200.00 €    |
+| Estimated calendar time, in calendar weeks (Assume team of 5 people, 8 hours per day, 5 days per week ) |     3 week     |
 
 # Estimate by product decomposition
 
