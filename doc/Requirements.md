@@ -112,9 +112,9 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |                                | 4.4 Real time sync with database tables |
 |FR5: Authentication and autorization process| 5.1 Login with email and password |
 |                                            | 5.2 Logout |
-|                                            | 5.2 Check if a subscription is active |
-|                                            | 5.3 Prompt to pay the subscription if it is not active |
-|                                            | 5.4 Create a new account for a shop |
+|                                            | 5.3 Check if a subscription is active |
+|                                            | 5.4 Prompt to pay the subscription if it is not active |
+|                                            | 5.5 Create a new account for a shop |
 |FR6: Exchange data with other software products| 6.1 Connect to the internet (via HTTPS) to exchange data with external cloud-based services (e.g., POS system, payment services) |
 |                                | 6.2 Usage of an already established format to exchange standardized product data between software components |
 
@@ -132,11 +132,28 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |  NFR6   | Usability                          | Adult between 18 and 70 years old accustomed to using desktop softwares, average education level (ex total 13 years in school). Users should be able to use application without training in less than 5 minutes|  |
 
 # Table of rights
-
-|  Actor   | FR1         | FR2 | FR3 | FR4 | FR5 | FR6 |
-| :---:    | :---------: | :---: | :---: | :---: | :---: | :---: |
-| end user | y | y | y | y | n | n |
-#TODO ask if we have to add each FR
+| FR id | Shop Owner | End User | Cashier | Cash register software  |  Payment service |  Accounting software |
+|-------|------------|----------|---------|-------------------------|------------------|----------------------|
+| FR1.1 | Y          | Y        | Y       | Y                       | N                | N                    |
+| FR1.2 | Y          | Y        | Y       | N                       | Y                | N                    |
+| FR2.1 | Y          | Y        | N       | Y                       | N                | N                    |
+| FR2.2 | Y          | Y        | Y       | Y                       | N                | Y                    |
+| FR3.1 | Y          | Y        | N       | N                       | N                | N                    |
+| FR3.2 | Y          | Y        | N       | N                       | N                | N                    |
+| FR3.3 | Y          | Y        | N       | N                       | N                | N                    |
+| FR3.4 | Y          | Y        | N       | N                       | N                | N                    |
+| FR3.5 | Y          | Y        | N       | N                       | N                | N                    |
+| FR4.1 | Y          | Y        | N       | N                       | N                | N                    |
+| FR4.2 | Y          | Y        | N       | N                       | N                | N                    |
+| FR4.3 | Y          | N        | N       | N                       | N                | Y                    |
+| FR4.4 | N          | N        | N       | N                       | N                | N                    |
+| FR5.1 | Y          | Y        | Y       | N                       | N                | N                    |
+| FR5.2 | Y          | Y        | Y       | N                       | N                | N                    |
+| FR5.3 | Y          | N        | N       | N                       | Y                | N                    |
+| FR5.4 | Y          | N        | N       | N                       | N                | N                    |
+| FR5.5 | Y          | N        | N       | N                       | N                | N                    |
+| FR6.1 | N          | N        | N       | Y                       | Y                | Y                    |
+| FR6.2 | N          | N        | N       | Y                       | Y                | Y                    |
 
 # Use case diagram and use cases
 
