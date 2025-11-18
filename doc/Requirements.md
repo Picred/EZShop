@@ -53,8 +53,87 @@ The document will be evaluated considering the typical defects in requirements (
 Consider that the document should be delivered to another team (unknown to you)
  which will be in charge of designing and implementing the system. The design team should be able to proceed only with the information in the document.
 
+
 # Business Model
-EZShop will cost a monthly fee of x euros/month. The product won't contain advertising and will be inaccessible if the monthly fee is not paid for the current month
+
+EZShop is a simple subscription-based tool created to support small shop owners in their everyday operations. It helps with sales tracking, inventory management, supplier orders, and basic financial insights.  
+Below is the expanded business model described through the Business Model Canvas.
+
+
+## 1. Value Proposition
+- Easy-to-use software designed for small shops.
+- Reduces manual work through automatic sales and stock updates.
+- Minimizes inventory errors by integration with the cash register system.
+- Automatically generates and emails purchase orders to suppliers.
+- Offers simple dashboards for revenue, profit, expenses, and taxes.
+
+
+
+## 2. Customer Segments
+- **Primary:**  
+  - Small independent shops (grocery stores, clothing shops, bookstores, etc.).
+  - Shop owners who want a practical tool without technical complexity (easy to use).
+
+- **Secondary:**  
+  - Cashiers and employees who use the software daily.
+
+
+
+## 3. Channels
+- Official EZShop website.
+- Social media or targeted online ads.
+- Listing on software marketplaces.
+- Word of mouth and referrals from accountants or POS providers.
+
+
+
+## 4. Customer Relationships
+- Self-service onboarding with a simple signup process.
+- Automated subscription and payment handling.
+- Email support.
+- Newsletters with updates and tips.
+
+
+## 5. Revenue Streams
+
+  - Monthly subscription fee (x €/month).  
+  - No advertising. Access is paused if the subscription is not paid.
+
+
+
+
+## 6. Key Activities
+- Developing and improving the EZShop software.
+- Maintaining stable POS and external service integrations.
+- Ensuring smooth payment processing and email delivery.
+- Providing customer support.
+- Keeping the system secure and compliant.
+- Gathering user feedback and planning new features.
+
+
+## 7. Key Resources
+- Development team (engineers, QA, designers).
+- Servers and databases.
+- Payment gateway integration.
+- Email service for sending supplier orders.
+
+
+
+## 8. Key Partners
+- Payment service provider for subscription fees.
+- POS software providers for data exchange.
+- Email service provider.
+- Hosting provider.
+
+
+## 9. Cost Structure
+- Software development and maintenance.
+- Hosting and database expenses.
+- Payment processing fees.
+- Email delivery costs.
+- Customer support operations.
+- Marketing, software maintenance, and administration.
+
 
 # Stakeholders
 
