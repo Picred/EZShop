@@ -165,18 +165,18 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 |FR3: Manage orders to suppliers | 3.1 Insert, read, update, delete suppliers contacts |
 |                                | 3.2 Create a new purchase order from a given supplier, specifying products and amounts |
 |                                | 3.3 EZShop is able to send email to a supplier after the creation of a new order |
-|                                | 3.4 Automatically insert a record for an order when email is sent |
+|                                | 3.4 Automatically insert a record in Order table for an order when email is sent |
 |                                | 3.5 Function to mark an order as completed and adding received products to inventory table |
 |FR4: Data visualization         | 4.1 Display charts overview about stored data |
 |                                | 4.2 Filtering by category, time range, etc |
 |                                | 4.3 Computes profits, expenses, taxes |
-|                                | 4.4 Real time sync with database tables |
-|FR5: Authentication and autorization process| 5.1 Login with email and password |
+|                                | 4.4 Real time sync between database tables and frontend |
+|FR5: Authentication and autorization process| 5.1 Login with email, password and 2FA using email |
 |                                            | 5.2 Logout |
 |                                            | 5.3 Check if a subscription is active |
 |                                            | 5.4 Prompt to pay the subscription if it is not active |
 |                                            | 5.5 Create a new account for a shop |
-|FR6: Exchange data with other software products| 6.1 Connect to the internet (via HTTPS) to exchange data with external cloud-based services (e.g., POS system, payment services) |
+|FR6: Exchange data | 6.1 Connect to the internet (via HTTPS) to exchange data with external cloud-based services (e.g., POS system, payment services) |
 |                                | 6.2 Usage of an already established format to exchange standardized product data between software components |
 
 ## Non Functional Requirements
@@ -185,12 +185,12 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 
 |   ID    | Type (efficiency, reliability, ..) | Description | Refers to |
 | :-----: | :--------------------------------: | :---------: | :-------: |
-|  NFR1   | Portability                        | The application is targeting desktop platforms and to reduce porting work, a cross platform framework will be used to support Windows, Mac Os and Linux environments |        |
-|  NFR2   | Performance                        | Query return time should be less than 3 seconds |           |
-|  NFR3   | Performance                        | Synchronization with local tables should happen every minute and should take less than 5 seconds |           |
+|  NFR1   | Portability                        | The application is targeting desktop platforms and to reduce porting work, a cross platform framework will be used to support Windows, Mac Os and Linux environments |    all    |
+|  NFR2   | Performance                        | Query return time should be less than 3 seconds |    FR1, FR2, FR3, FR4, FR5      |
+|  NFR3   | Performance                        | Synchronization with local tables should happen in real time after refresh and should take less than 5 seconds |    FR4.4       |
 |  NFR4   | Maintainability                    | Codebase should be structured in distinct modules that can be easily maintained and updated |           |
 |  NFR5   | Security                           | Each account needs to have 2FA enabled | FR5 |
-|  NFR6   | Usability                          | Adult between 18 and 70 years old accustomed to using desktop softwares, average education level (ex total 13 years in school). Users should be able to use application without training in less than 5 minutes|  |
+|  NFR6   | Usability                          | Adult between 18 and 70 years old accustomed to using desktop softwares, average education level (ex total 13 years in school). Users should be able to use application without training in less than 5 minutes| all  |
 
 # Table of rights
 | FR id | End User | Cash register software  |  Payment service |  Accounting software |
