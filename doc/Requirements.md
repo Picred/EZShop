@@ -145,10 +145,9 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | :---:    | :---------: | :---: |
 | UC1 Account creation | Activate a new account for a shop | main actor: end user - The end user inserts the requested credentials in the EZShop account database |
 | UC2 Payment of the subscription | Activate the subscription for the selected account | main actor: shop owner, payment service - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
-| UC3 Account activation | Having access to EZShop | main actor: end user - after paying the subscription fee through the payment service, the end user can use every features of application |
 | UC4 Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
 | UC5 Logout process | Sign out from the currently signed in account | main actor: end user - the user is able to log out and lose access to EZShop features |
-| UC6 Register a new product | Registration of a product that is being sold at the shop | main actor: end user, cash register software - A new product can be inserted in the product database both manually (by the end user) and automatically at the time of sale thanks to the ability to exchange data with the cash register software |
+| UC6 Register a new product | Registration of a new product in stock | main actor: end user - A new product can be inserted in the inventory manually |
 | UC7 Record a new sale | Record a sale | main actor: end user, cash register - A new sale can be inserted in the sale database both manually (by the end user) and automatically thanks to the ability to exchange data with the cash register software |
 | UC8 Record a refund | Record a refund | main actor: end user, cash register software - A customer can decide to ask for a refund of a previously sold product. This operation can be both managed by the cash register software as well as the end user |
 | UC9 Manage supplier contacts | Create and keep supplier information up to date | main actor: end user - The end user can add, edit, or delete supplier contact details. Supplier data is stored in a dedicated database table for use when creating purchase orders |
@@ -308,9 +307,9 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | User has an Account with an 'active' Subscription (Post-condition of UC2). |
-| Post condition | The User is authenticated, a session is created, and the main dashboard is displayed. |
-| Nominal Scenario | The user provides valid credentials (email, password, 2FA) and gains access to the system. |
+| Precondition | End User has an active Account. |
+| Post condition | The End User is authenticated. |
+| Nominal Scenario | The end user provides valid credentials (email, password, 2FA) and gains access to the system. |
 | Variants | N/A |
 | Exceptions | 1a. Invalid email or password. <br> 2a. Subscription is not active. <br> 3a. 2FA code is incorrect. |
 
@@ -415,7 +414,7 @@ Steps
 | Precondition | User is logged in (UC4). |
 | Post condition | A new Product record is created in the inventory database. |
 | Nominal Scenario | (Manual) The End User navigates to the inventory section and manually fills in the details for a new product. |
-| Variants | 1v. (Automatic) The Cash Register Software sends data for a new product via API. |
+| Variants | N/A |
 | Exceptions | 1a. The barcode or product ID already exists. <br> 2a. Invalid data (e.g., negative quantity, missing name). |
 
 ##### Scenario 6.1: Manual Product Registration
@@ -434,25 +433,10 @@ Steps
 | | 5. Saves the new Product record to the database. | FR2.1 |
 | | 6. Displays a "Product Saved" success message. | |
 
-##### Scenario 6.2: (Variant) Automatic Product Registration from POS
 
-| Scenario 6.2 | Automatic product registration from POS |
-| :---: | :--- |
-| Precondition | Cash Register Software processes a transaction with an unknown barcode. |
-| Post condition | A new Product record is saved to the database. |
+##### Scenario 6.2: (Exception) Barcode Already Exists
 
-Steps
-
-| Actor's action | System action | FR needed |
-| :--- | :--- | :---: |
-| 1. (Cash Register) Sends new product data (barcode, name, price) via API. | | FR6.1, FR6.2 |
-| | 2. Receives the data. | |
-| | 3. Validates the data (e.g., checks if barcode already exists). | |
-| | 4. Creates a new Product record (likely with current_quantity = 0 or 1). | FR2.1 |
-
-##### Scenario 6.3: (Exception) Barcode Already Exists
-
-| Scenario 6.3 | Barcode already exists |
+| Scenario 6.2 | Barcode already exists |
 | :---: | :--- |
 | Precondition | User is in the "Add New Product" form (Scenario 6.1). |
 | Post condition | The new product is not saved. |
@@ -465,9 +449,9 @@ Steps
 | | 3. Displays an error message: "This barcode is already in use by another product." | |
 | | 4. User remains on the product form. | |
 
-##### Scenario 6.4: (Exception) Invalid Data
+##### Scenario 6.3: (Exception) Invalid Data
 
-| Scenario 6.4 | Invalid data |
+| Scenario 6.3 | Invalid data |
 | :---: | :--- |
 | Precondition | User is in the "Add New Product" form (Scenario 6.1). |
 | Post condition | The new product is not saved. |
