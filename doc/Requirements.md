@@ -599,54 +599,35 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | User is logged in (UC4). At least one Supplier (UC9) and one Product (UC6) exist. |
-| Post condition | An Order record (with OrderItems) is created. An email is sent to the supplier. |
-| Nominal Scenario | The user creates a new purchase order, adds products, and submits it. The system saves the order and emails the supplier. |
+| Precondition | End User is logged in (UC3). At least one Supplier (UC8) and one Product (UC5) exist. |
+| Post condition | An Order record is created. An email is sent to the supplier. |
+| Nominal Scenario | The user creates a new purchase order, select needed products, and submits it. The system saves the order and emails the supplier. |
 | Variants | N/A |
-| Exceptions | 1a. Supplier email address is missing. <br> 2a. The email sending service fails. |
+| Exceptions | 1a. The email sending service fails. |
 
 ##### Scenario 9.1: Create and Send Purchase Order
 
 | Scenario 9.1 | Create and send purchase order |
 | :---: | :--- |
-| Precondition | User is in the "Purchase Orders" section. |
+| Precondition | End User is in the "Purchase Orders" section. |
 | Post condition | Order is saved with 'Sent' status. Email is sent to the supplier. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Clicks "New Purchase Order". | 2. Prompts user to select a Supplier from the list. | FR3.2 |
+| 1. Clicks "New Purchase Order". | 2. Prompts End User to select a Supplier from the list. | FR3.2 |
 | 3. Selects a Supplier. | 4. Displays the new order form. | |
 | 5. Adds Products and specifies quantities for each. | | FR3.2 |
-| 6. Clicks "Submit Order". | 7. Saves the Order and its OrderItems to the database (status 'Pending'). | FR3.4 |
-| | 8. Generates an email (e.g., PDF) with the order details. | FR3.3 |
-| | 9. Sends the email to the selected Supplier.email. | FR3.3 |
-| | 10. Updates the Order status to 'Sent'. | FR3.4 |
+| 6. Clicks "Add New Order". | 7. Saves the Order record in the orders table with its status set on 'Waiting for Arrival'. | FR3.4 |
+| | 8. Generates and sends the email with the order details to the selected Supplier.email. | FR3.3 |
 
-##### Scenario 9.2: (Exception) Supplier Email Missing
-
-| Scenario 9.2 | Supplier email address is missing |
-| :---: | :--- |
-| Precondition | User clicks "Submit Order" (Scenario 9.1, step 6). |
-| Post condition | Order is saved with status 'Pending' or 'Draft'. Email is not sent. |
-
-Steps
-
-| Actor's action | System action | FR needed |
-| :--- | :--- | :---: |
-| | 1. Saves the Order. | FR3.4 |
-| | 2. Attempts to retrieve Supplier.email to send the email. | FR3.3 |
-| | 3. Finds the email field is null or empty. | |
-| | 4. Does not send the email. Updates Order status to 'Draft' or 'Error'. | |
-| | 5. Notifies the user: "Order saved as Draft. Cannot send: Supplier email is missing." | |
-
-##### Scenario 9.3: (Exception) Email Sending Service Fails
+##### Scenario 9.2: (Exception) Email Sending Service Fails
 
 | Scenario 9.3 | The email sending service fails |
 | :---: | :--- |
 | Precondition | User clicks "Submit Order" (Scenario 9.1, step 6). |
-| Post condition | Order is saved with status 'Pending'. Email is not sent. |
+| Post condition | Order is saved with status 'Waiting for arrival', but the email is not sent. |
 
 Steps
 
@@ -654,8 +635,7 @@ Steps
 | :--- | :--- | :---: |
 | | 1. Saves the Order. | FR3.4 |
 | | 2. Generates the email. | FR3.3 |
-| | 3. Attempts to send the email, but the external email service returns an error (e.g., 500). | FR3.3 |
-| | 4. Does not update the Order status to 'Sent'. It remains 'Pending'. | |
+| | 3. Attempts to send the email, but the external email service returns an error. | FR3.3 |
 | | 5. Notifies the user: "Order saved. Failed to send email. Please try sending again manually." | |
 
 ---
