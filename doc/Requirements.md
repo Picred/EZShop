@@ -159,12 +159,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 ## Use case diagram
 
-\<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
-
 ![Use Case Diagram](media/uc_diagram_ezshop.png)
-
-
-\<next describe here each use case in the UCD>
 
 ### Use case 1, UC1: Account Creation
 
