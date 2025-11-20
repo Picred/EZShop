@@ -644,59 +644,42 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | An Order exists with a 'Sent' status (Post-condition of UC10). The shop has received the physical products. |
-| Post condition | The Order status is updated to 'Completed'. The Product.current_quantity for received items is increased. |
-| Nominal Scenario | The user finds the pending order, confirms receipt of all items, and the system updates inventory. |
-| Variants | 1v. (Partial Delivery) User marks only some items as received, Order status becomes 'Partially Received'. |
-| Exceptions | 1a. User tries to mark an already completed order. |
+| Precondition | An Order exists with a 'Sent' status (Post-condition of UC9). The shop has received the physical products. |
+| Post condition | The Order status is updated to 'Completed'. The inventory records for received items is updated correspondingly. |
+| Nominal Scenario | The user selects the pending order, marks it as completed, and the system updates the inventory table. |
+| Variants | N/A. |
+| Exceptions | 1a. User tries to mark as completed an already completed order. |
 
-##### Scenario 10.1: Receive Full Order
+##### Scenario 10.1: Order Succesfully Received
 
-| Scenario 10.1 | Receive full order |
+| Scenario 10.1 | Order Succesfully Received |
 | :---: | :--- |
-| Precondition | A physical delivery from a supplier has arrived. User is logged in. |
-| Post condition | Order status is 'Completed'. Product inventory is restocked. |
+| Precondition | A physical delivery from a supplier has arrived. End User is logged in. |
+| Post condition | Order status is set 'Completed'. Inventory table is updated. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Navigates to "Purchase Orders" and finds the 'Sent' order. | | |
-| 2. Clicks "Receive Stock" or "Mark as Completed". | 3. Displays the list of OrderItems from the order. | FR3.5 |
-| 4. Confirms all quantities are correct and clicks "Confirm". | 5. Updates the Order status to 'Completed'. | FR3.5 |
-| | 6. For each OrderItem in the order: <br> &nbsp;&nbsp; a. Finds the matching Product. <br> &nbsp;&nbsp; b. Increases Product.current_quantity by the received amount. | FR3.5, FR2.1 |
+| 1. Navigates to "Orders" and selects the desired order's context menu. | | |
+| 2. Clicks on "Mark as Completed". |  | |
+| | 5. Updates the Order status to 'Completed'. | FR3.5 |
+| | 6. For each product in the order in the order: <br> &nbsp;&nbsp; a. Finds the matching inventory record. <br> &nbsp;&nbsp; b. update the 'quantity' field by the received amount. | FR3.5, FR2.1 |
 
-##### Scenario 10.2: (Variant) Receive Partial Order
-
-| Scenario 10.2 | Receive partial order |
-| :---: | :--- |
-| Precondition | A partial delivery has arrived. User is logged in. |
-| Post condition | Order status is 'Partially Received'. Inventory is updated only for received items. |
-
-Steps
-
-| Actor's action | System action | FR needed |
-| :--- | :--- | :---: |
-| 1. Navigates to the 'Sent' order. Clicks "Receive Stock". | 2. Displays the list of expected OrderItems (e.g., 10x 'Apple', 5x 'Banana'). | FR3.5 |
-| 3. Edits the received quantity (e.g., to 10x 'Apple', 0x 'Banana'). Clicks "Confirm". | 4. Validates the partial quantities. | |
-| | 5. Updates the Order status to 'Partially Received'. | FR3.5 |
-| | 6. Increases Product.current_quantity for 'Apple' by 10. | FR3.5, FR2.1 |
-| | 7. Does not update inventory for 'Banana'. | |
-
-##### Scenario 10.3: (Exception) Order Already Completed
+##### Scenario 10.2: (Exception) Order Already Completed
 
 | Scenario 10.3 | Order already completed |
 | :---: | :--- |
-| Precondition | User navigates to an order that is already marked 'Completed'. |
+| Precondition | End User navigates to an order that is already marked 'Completed'. |
 | Post condition | No change is made. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Finds a 'Completed' order. | | |
-| | 2. The "Receive Stock" button is disabled. | FR3.5 |
-| 3. (If button were enabled) Clicks "Receive Stock". | 4. System checks status and shows message: "This order is already completed. No further actions can be taken." | |
+| 1. Selects a 'Completed' order. | | |
+| | 2. The "Mark as Completed" button is disabled. | FR3.5 |
+| 3. The End User isn't able to execute this action |  | |
 
 ---
 
