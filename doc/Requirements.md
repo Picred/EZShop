@@ -363,7 +363,7 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | End User is currently logged in (Post-condition of UC4). |
+| Precondition | End User is currently logged in (Post-condition of UC3). |
 | Post condition | The user's session is terminated. The system displays the login screen. |
 | Nominal Scenario | The user clicks the "Logout" button and is successfully signed out. |
 | Variants | N/A |
@@ -390,7 +390,7 @@ Steps
 
 | Actors Involved | End User, Cash Register Software (External) |
 | :---: | :--- |
-| Precondition | User is logged in (UC4). |
+| Precondition | User is logged in (UC3). |
 | Post condition | A new Product record is created in the inventory database. |
 | Nominal Scenario | (Manual) The End User navigates to the inventory section and manually fills in the details for a new product. |
 | Variants | N/A |
@@ -447,7 +447,7 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | Product(s) exist in the inventory (UC6). |
+| Precondition | Product(s) exist in the inventory (UC5). |
 | Post condition | A new Sale (Transaction) record is created. The Product.current_quantity for sold items is decreased. |
 | Nominal Scenario | The End User manually enters a sale into the EZShop interface. |
 | Variants | N/A |
