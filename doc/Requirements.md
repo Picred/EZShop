@@ -212,15 +212,15 @@ Steps
 | Precondition | An Account exists but its Subscription status is 'inactive' (Post-condition of UC1). |
 | Post condition | The Account's Subscription status is set to 'active'. |
 | Nominal Scenario | The End User provides valid payment details, the external Payment Service confirms the transaction, and the system activates the subscription. |
-| Variants | 1v. User pays for an expired subscription. |
-| Exceptions | 1a. The Payment Service declines the transaction (e.g., insufficient funds). <br> 2a. The Payment Service is unreachable. |
+| Variants | 1v. End User pays for an expired subscription. |
+| Exceptions | 1a. The Payment Service declines the transaction. <br> 2a. The Payment Service is unreachable. |
 
 ##### Scenario 2.1: Successful Subscription Activation
 
 | Scenario 2.1 | Successful subscription activation |
 | :---: | :--- |
 | Precondition | End User is at the payment screen, prompted to pay. |
-| Post condition | The Subscription.is_paid status is set to 'true'. The user is granted access to the application's main features. |
+| Post condition | The Subscription status is set to 'true'. The user is granted access to the application's main features. |
 
 Steps
 
@@ -228,23 +228,23 @@ Steps
 | :--- | :--- | :---: |
 | 1. Enters credit card details and confirms payment. | | |
 | | 2. Securely sends the payment request to the external Payment Service via API. | FR6.1 |
-| | 3. (External Payment Service) Processes the payment and returns a 'success' confirmation. | |
-| | 4. Receives the 'success' confirmation. | |
-| | 5. Updates the Subscription record for the Account to 'active' ('is_paid' = true). | FR5.3 |
-| | 6. Displays "Payment Successful" message and grants access to the main application dashboard. | |
+| | 3. (External Payment Service) Processes the payment and returns a 'success' confirmation. | FR6.1 |
+| | 4. Receives the 'success' confirmation. | FR6.1 |
+| | 5. Updates the Subscription status for the Account to 'active'. | FR5.3 |
+| | 6. Displays the main application dashboard. | |
 
 ##### Scenario 2.2: (Variant) Pay for Expired Subscription
 
 | Scenario 2.2 | Pay for expired subscription |
 | :---: | :--- |
-| Precondition | End User is logged out or blocked from features due to an 'inactive' subscription. |
-| Post condition | The Subscription.is_paid status is set to 'true'. |
+| Precondition | End User is logged in, but blocked from features due to an 'inactive' subscription. |
+| Post condition | The Subscription status is set to 'true'. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Tries to log in (UC4) or access a feature. | 2. System checks subscription and finds it 'inactive'. | FR5.3 |
+| 1. Tries to log in (UC4). | 2. System checks subscription and finds it 'inactive'. | FR5.3 |
 | | 3. System blocks access and redirects to the payment screen. | FR5.4 |
 | 4. Follows steps 1-6 from Scenario 2.1. | | FR6.1, FR5.3 |
 
@@ -263,7 +263,7 @@ Steps
 | | 2. Securely sends the payment request to the external Payment Service via API. | FR6.1 |
 | | 3. (External Payment Service) Processes the payment and returns a 'declined' message. | |
 | | 4. Receives the 'declined' message. | |
-| | 5. Displays an error message to the user (e.g., "Payment failed. Please check your details."). | |
+| | 5. Displays an error message to the user. | |
 
 ##### Scenario 2.4: (Exception) Payment Service Unreachable
 
@@ -278,8 +278,8 @@ Steps
 | :--- | :--- | :---: |
 | 1. Enters credit card details and confirms payment. | | |
 | | 2. Attempts to send the payment request to the external Payment Service via API. | FR6.1 |
-| | 3. The connection fails (e.g., timeout, 503 error). | FR6.1 |
-| | 4. Displays an error message to the user (e.g., "Payment service is currently unavailable. Please try again later."). | |
+| | 3. The connection fails. | FR6.1 |
+| | 4. Displays an error message to the user. | |
 
 ---
 
