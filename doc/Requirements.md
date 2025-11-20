@@ -169,7 +169,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | Post condition | A new Account record exists in the database. The account's Subscription status is 'inactive'. |
 | Nominal Scenario | The End User successfully fills the registration form, and the system creates a new account. |
 | Variants | N/A |
-| Exceptions | 1a. Email already in use. <br> 2a. The password does not meet security requirements. |
+| Exceptions | 1a. Email already in use. |
 
 ##### Scenario 1.1: Successful New Account Registration
 
@@ -182,8 +182,8 @@ Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Selects "Create Account". | 2. Displays the registration form (Shop Name, Email, Password). | FR5.5 |
-| 3. Fills in the required details and clicks "Submit". | 4. Validates the provided data (e.g., email format, password strength). | FR5.5 |
+| 1. Selects "Create Account". | 2. Displays the registration form. | FR5.5 |
+| 3. Fills in the required details and clicks "Register". | 4. Validates the provided data | FR5.5 |
 | | 5. Creates a new Account record in the database. | FR5.5 |
 | | 6. Redirects the user to the subscription payment screen (initiating UC2). | FR5.4 |
 
@@ -192,31 +192,16 @@ Steps
 | Scenario 1.2 | Email already in use |
 | :---: | :--- |
 | Precondition | End User is on the application's "Create Account" screen. |
-| Post condition | A new Account is not created. The system shows an "Email already exists" notification. |
+| Post condition | A new Account is not created. The system shows an "Account with the inserted email already exists" notification. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Selects "Create Account". | 2. Displays the registration form (Shop Name, Email, Password). | FR5.5 |
+| 1. Selects "Create Account". | 2. Displays the registration form. | FR5.5 |
 | 3. Fills in the required details and clicks "Submit". | 4. Validates the provided data. | FR5.5 |
 | | 5. Checks database and finds the email is already associated with another Account. | |
 | | 6. Notifies the user that the provided email already exists. | |
-
-##### Scenario 1.3: (Exception) Password Is Low Secure
-
-| Scenario 1.3 | Password is low secure |
-| :---: | :--- |
-| Precondition | End User is on the application's "Create Account" screen. |
-| Post condition | A new Account is not created. The system shows a "Password is low secure..." notification. |
-
-Steps
-
-| Actor's action | System action | FR needed |
-| :--- | :--- | :---: |
-| 1. Selects "Create Account". | 2. Displays the registration form (Shop Name, Email, Password). | FR5.5 |
-| 3. Fills in the required details and clicks "Submit". | 4. Validates the provided data and determines the password strength is insufficient. | FR5.5 |
-| | 5. Shows a notification with password requirements (special character, number, upper case, etc.). | |
 
 ---
 
