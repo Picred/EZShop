@@ -732,58 +732,28 @@ Steps
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | User is logged in (UC4). Data (Sales, Orders) exists in the database. |
+| Precondition | End User is logged in (UC3). Data (Sales, Orders) exists in the database. |
 | Post condition | The user has viewed the requested charts and aggregated data. |
 | Nominal Scenario | The user accesses the dashboard, views default charts, and applies filters to analyze data. |
-| Variants | 1v. User exports data to CSV/XML for Accounting Software. |
+| Variants | N/A |
 | Exceptions |  |
 
 ##### Scenario 12.1: View and Filter Dashboard
 
 | Scenario 12.1 | View and filter dashboard |
 | :---: | :--- |
-| Precondition | User is logged in. |
+| Precondition | End User is logged in. |
 | Post condition | User views charts/data based on selected filters. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Clicks on the "Dashboard" or "Reports" tab. | 2. Queries the database. | FR4.4 |
-| | 3. Displays default charts (e.g., Sales over time, Top Products). | FR4.1 |
-| | 4. Displays computed metrics (Profits, Expenses, Taxes). | FR4.3 |
+| 1. Clicks on the "Analytics" tab. | 2. Queries the database. | FR4.4 |
+| | 3. Displays chart and computed metrics| FR4.1, FR4.3 |
 | 5. Selects a time range filter (e.g., "Last 30 days"). | | FR4.2 |
 | | 6. Re-queries the database with the new filter. | NFR2 |
 | | 7. Updates the charts and metrics to reflect the filtered data. | FR4.1, FR4.2 |
-
-##### Scenario 12.2: (Variant) Export Data for Accounting
-
-| Scenario 12.2 | Export data for accounting |
-| :---: | :--- |
-| Precondition | User is in the "Reports" section. |
-| Post condition | A file (CSV/XML) is downloaded to the user's computer. |
-
-Steps
-
-| Actor's action | System action | FR needed |
-| :--- | :--- | :---: |
-| 1. Clicks "Export Data". | | FR6.2 |
-| 2. Selects a date range and format (e.g., CSV). Clicks "Export". | 3. Queries the database for the relevant financial data. | FR4.3 |
-| | 4. Formats the data into the standardized CSV/XML format. | FR6.2 |
-| | 5. Prompts the user to save the file. | |
-| 6. Saves the file. | | |
-
-
-
-\<describe here scenarios instances of UC1>
-
-\<a scenario is a sequence of steps that corresponds to a particular execution of one use case>
-
-\<a scenario is a more formal description of a story>
-
-\<only relevant scenarios should be described>
-
-
 
 # Glossary
 
