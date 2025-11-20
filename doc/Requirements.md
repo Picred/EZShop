@@ -61,7 +61,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | Stakeholder name       | Description                                                                                      |
 | :--------------------: | :----------------------------------------------------------------------------------------------: |
 | Developers             | EZShop developers, in charge of developing and maintaining the product                           |
-| Shop owner             | owner of the shop, who is the one choosing to adopt EZShop for his business                      |
+| End User             | owner of the shop, who is the one choosing to adopt EZShop for his business                      |
 | End user               | individual who directly interacts with the software, often a sale manager of some kind           |
 | Supplier               | company who supplies the shop with products of various nature                                    |
 | Cashier                | Employee of the shop who operates the Point of Sale (POS)                                        |
@@ -69,7 +69,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 | Payment service        | used **only**  to pay the monthly fee                                                            |
 | Accounting software    | possible other software present in the business with whom EZShop will need to interact           |
 
-#TODO is differentiating shop owner and end user actually useful in the case od a small shop?
+#TODO is differentiating End User and end user actually useful in the case od a small shop?
 
 
 # Context Diagram and interfaces
@@ -144,7 +144,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |  UC name   | Goal         | Description |
 | :---:    | :---------: | :---: |
 | UC1 Account creation | Activate a new account for a shop | main actor: end user - The end user inserts the requested credentials in the EZShop account database |
-| UC2 Payment of the subscription | Activate the subscription for the selected account | main actor: shop owner, payment service - Thanks to a credit card circuit, the shop owner is able to (automatically) pay the monthly fee |
+| UC2 Payment of the subscription | Activate the subscription for the selected account | main actor: End User, payment service - Thanks to a credit card circuit, the End User is able to (automatically) pay the monthly fee |
 | UC3 Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
 | UC4 Logout process | Sign out from the currently signed in account | main actor: end user - the user is able to log out and lose access to EZShop features |
 | UC5 Register a new product | Registration of a new product in stock | main actor: end user - A new product can be inserted in the inventory manually |
@@ -163,11 +163,11 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 ### Use case 1, UC1: Account Creation
 
-| Actors Involved | Shop Owner |
+| Actors Involved | End User |
 | :---: | :--- |
-| Precondition | Shop Owner has access to the EZShop application. |
+| Precondition | End User has access to the EZShop application. |
 | Post condition | A new Account record exists in the database. The account's Subscription status is 'inactive'. |
-| Nominal Scenario | The Shop Owner successfully fills the registration form, and the system creates a new account. |
+| Nominal Scenario | The End User successfully fills the registration form, and the system creates a new account. |
 | Variants | N/A |
 | Exceptions | 1a. Email already in use. <br> 2a. The password does not meet security requirements. |
 
@@ -175,7 +175,7 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 
 | Scenario 1.1 | Successful new account registration |
 | :---: | :--- |
-| Precondition | Shop Owner is on the application's "Create Account" screen. |
+| Precondition | End User is on the application's "Create Account" screen. |
 | Post condition | A new Account is created. The system prompts the user to pay for the subscription (UC2). |
 
 Steps
@@ -191,7 +191,7 @@ Steps
 
 | Scenario 1.2 | Email already in use |
 | :---: | :--- |
-| Precondition | Shop Owner is on the application's "Create Account" screen. |
+| Precondition | End User is on the application's "Create Account" screen. |
 | Post condition | A new Account is not created. The system shows an "Email already exists" notification. |
 
 Steps
@@ -207,7 +207,7 @@ Steps
 
 | Scenario 1.3 | Password is low secure |
 | :---: | :--- |
-| Precondition | Shop Owner is on the application's "Create Account" screen. |
+| Precondition | End User is on the application's "Create Account" screen. |
 | Post condition | A new Account is not created. The system shows a "Password is low secure..." notification. |
 
 Steps
@@ -222,11 +222,11 @@ Steps
 
 ### Use case 2, UC2: Payment of the Subscription
 
-| Actors Involved | Shop Owner, Payment Service (External) |
+| Actors Involved | End User, Payment Service (External) |
 | :---: | :--- |
 | Precondition | An Account exists but its Subscription status is 'inactive' (Post-condition of UC1). |
 | Post condition | The Account's Subscription status is set to 'active'. |
-| Nominal Scenario | The Shop Owner provides valid payment details, the external Payment Service confirms the transaction, and the system activates the subscription. |
+| Nominal Scenario | The End User provides valid payment details, the external Payment Service confirms the transaction, and the system activates the subscription. |
 | Variants | 1v. User pays for an expired subscription. |
 | Exceptions | 1a. The Payment Service declines the transaction (e.g., insufficient funds). <br> 2a. The Payment Service is unreachable. |
 
@@ -234,7 +234,7 @@ Steps
 
 | Scenario 2.1 | Successful subscription activation |
 | :---: | :--- |
-| Precondition | Shop Owner is at the payment screen, prompted to pay. |
+| Precondition | End User is at the payment screen, prompted to pay. |
 | Post condition | The Subscription.is_paid status is set to 'true'. The user is granted access to the application's main features. |
 
 Steps
@@ -252,7 +252,7 @@ Steps
 
 | Scenario 2.2 | Pay for expired subscription |
 | :---: | :--- |
-| Precondition | Shop Owner is logged out or blocked from features due to an 'inactive' subscription. |
+| Precondition | End User is logged out or blocked from features due to an 'inactive' subscription. |
 | Post condition | The Subscription.is_paid status is set to 'true'. |
 
 Steps
@@ -267,7 +267,7 @@ Steps
 
 | Scenario 2.3 | Payment declined |
 | :---: | :--- |
-| Precondition | Shop Owner is at the payment screen. |
+| Precondition | End User is at the payment screen. |
 | Post condition | The Subscription status remains 'inactive'. |
 
 Steps
@@ -284,7 +284,7 @@ Steps
 
 | Scenario 2.4 | Payment service unreachable |
 | :---: | :--- |
-| Precondition | Shop Owner is at the payment screen. |
+| Precondition | End User is at the payment screen. |
 | Post condition | The Subscription status remains 'inactive'. |
 
 Steps
