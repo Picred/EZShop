@@ -27,12 +27,18 @@ Version: 1.0.0
 - [Table of Rights](#table-of-rights)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
   - [Use case diagram](#use-case-diagram)
-    - [Use case 1, UC1](#use-case-1-uc1)
-      - [Scenario 1.1](#scenario-11)
-      - [Scenario 1.2](#scenario-12)
-      - [Scenario 1.x](#scenario-1x)
-    - [Use case 2, UC2](#use-case-2-uc2)
-    - [Use case x, UCx](#use-case-x-ucx)
+    - [Use case 1, UC1: Account Creation](#use-case-1-uc1-account-creation)
+    - [Use case 2, UC2: Subscription Payment](#use-case-2-uc2-payment-of-the-subscription)
+    - [Use case 3, UC3: Login Process](#use-case-3-uc3-login-process)
+    - [Use case 4, UC4: Logout Process](#use-case-4-uc4-logout-process)
+    - [Use case 5, UC5: New Product Registration](#use-case-5-uc5-new-product-registration)
+    - [Use case 6, UC6: New Sale Registration](#use-case-6-uc6-new-sale-registration)
+    - [Use case 7, UC7: Record a Refund](#use-case-7-uc7-record-a-refund)
+    - [Use case 8, UC8: Manage Suppliers Contacts](#use-case-8-uc8-manage-suppliers-contacts)
+    - [Use case 9, UC9: Submit a New Purchase Order](#use-case-9-uc9-submit-a-new-purchase-order)
+    - [Use case 10, UC10: Mark an Order as Completed](#use-case-10-uc10-mark-an-order-as-completed)
+    - [Use case 11, UC11: Update Inventory Records](#use-case-11-uc11-update-inventory-records)
+    - [Use case 12, UC12: Visualization of Data](#use-case-12-uc12-visualization-of-data)
 - [Glossary](#glossary)
 - [System Design](#system-design)
 - [Hardware Software architecture](#Hardware-software-architecture)
@@ -144,16 +150,16 @@ EZShop will cost a monthly fee of x euros/month. The product won't contain adver
 |  UC name   | Goal         | Description |
 | :---:    | :---------: | :---: |
 | UC1 Account creation | Activate a new account for a shop | main actor: end user - The end user inserts the requested credentials in the EZShop account database |
-| UC2 Payment of the subscription | Activate the subscription for the selected account | main actor: End User, payment service - Thanks to a credit card circuit, the End User is able to (automatically) pay the monthly fee |
+| UC2 Subscription Payment | Activate the subscription for the selected account | main actor: End User, payment service - Thanks to a credit card circuit, the End User is able to (automatically) pay the monthly fee |
 | UC3 Login process | Access to main functions | main actor: end user - With a given pair of credentials the end user can login to EZShop and start using it |
 | UC4 Logout process | Sign out from the currently signed in account | main actor: end user - the user is able to log out and lose access to EZShop features |
-| UC5 Register a new product | Registration of a new product in stock | main actor: end user - A new product can be inserted in the inventory manually |
-| UC6 Record a new sale | Record a sale | main actor: end user - A new sale can be inserted in the sale database by the end user |
+| UC5 New Product Registration | Registration of a new product in stock | main actor: end user - A new product can be inserted in the inventory manually |
+| UC6 New Sale Registration | Record a sale | main actor: end user - A new sale can be inserted in the sale database by the end user |
 | UC7 Record a refund | Record a refund | main actor: end user, cash register software - A customer can decide to ask for a refund of a previously sold product. This operation can be both managed by the cash register software as well as the end user |
-| UC8 Manage supplier contacts | Create and keep supplier information up to date | main actor: end user - The end user can add, edit, or delete supplier contact details. Supplier data is stored in a dedicated database table for use when creating purchase orders |
+| UC8 Manage suppliers contacts | Create and keep supplier information up to date | main actor: end user - The end user can add, edit, or delete supplier contact details. Supplier data is stored in a dedicated database table for use when creating purchase orders |
 | UC9 Submit a new purchase order | Generate a new purchase order to restock items | main actor: end user, supplier - The end user selects a supplier and specifies the products and quantities needed. The system generates a purchase order document and stores it in the database. The system automatically sends an email to the supplier |
 | UC10 Mark an order as completed | End the order procedure | main actor: end user - when one order is delivered, the end user marks it as completed |
-| UC11 Update inventory | Update inventory | main actor: end user - end user can change manually the amounts of products in stock |
+| UC11 Update inventory records | Update inventory | main actor: end user - end user can change manually the amounts of products in stock |
 | UC12 Visualization of data | Show charts, aggregating data | main actor: end user - end user can filter the data as desired |
 
 
@@ -386,7 +392,7 @@ Steps
 
 ---
 
-### Use case 5, UC5: Register a New Product
+### Use case 5, UC5: New Product Registration
 
 | Actors Involved | End User, Cash Register Software (External) |
 | :---: | :--- |
@@ -443,7 +449,7 @@ Steps
 
 ---
 
-### Use case 6, UC6: Record a New Sale
+### Use case 6, UC6: New Sale Registration
 
 | Actors Involved | End User |
 | :---: | :--- |
@@ -469,9 +475,9 @@ Steps
 || 5. Update inventory records related to the sold products . | FR2.1 |
 || 6. Insert a new sale record in the sales table . | FR1.1 |
 
-##### Scenario 6.3: (Exception) Product Not Found
+##### Scenario 6.2: (Exception) Product Not Found
 
-| Scenario 6.3 | Product not found |
+| Scenario 6.2 | Product not found |
 | :---: | :--- |
 | Precondition | System receives sale data (manual or automatic). |
 | Post condition | Sale record is not created. |
@@ -524,7 +530,7 @@ Steps
 | :--- | :--- | :---: |
 | 1. Navigates to "Sales" and opens the context menu for a given sale, clicking on 'Mark as Refunded'. | 3. Updates the corresponding sale record, changing its status from 'completed' to 'refunded'. | FR1.2 |
 
-### Use case 8, UC8: Manage Supplier Contacts
+### Use case 8, UC8: Manage Suppliers Contacts
 
 | Actors Involved | End User |
 | :---: | :--- |
@@ -683,7 +689,7 @@ Steps
 
 ---
 
-### Use case 11, UC11: Update Inventory
+### Use case 11, UC11: Update Inventory Records
 
 | Actors Involved | End User |
 | :---: | :--- |
