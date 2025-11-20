@@ -683,13 +683,13 @@ Steps
 
 ---
 
-### Use case 11, UC11: Update Inventory (Manual Adjustment)
+### Use case 11, UC11: Update Inventory
 
 | Actors Involved | End User |
 | :---: | :--- |
-| Precondition | User is logged in (UC4). Product(s) exist (UC6). |
-| Post condition | The Product.current_quantity is updated to a new specified value. |
-| Nominal Scenario | User is doing a stock count, finds a discrepancy (due to theft, breakage, or error), and manually corrects the quantity in the system. |
+| Precondition | End User is logged in (UC4). Product(s) exist (UC5). |
+| Post condition | The quantity field of a given inventory record is updated to a new specified value. |
+| Nominal Scenario | User manually change the quantity in the system. |
 | Variants | N/A |
 | Exceptions | 1a. User enters an invalid quantity (e.g., non-numeric, negative). |
 
@@ -697,17 +697,17 @@ Steps
 
 | Scenario 11.1 | Manual stock adjustment |
 | :---: | :--- |
-| Precondition | User is in the "Inventory" section. |
-| Post condition | The Product.current_quantity is updated. |
+| Precondition | End User is in the "Inventory" section. |
+| Post condition | The quantity field of the selected inventory record is updated to the new value. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Finds the Product to adjust. Clicks "Adjust Stock" or "Edit". | 2. Displays the product details, highlighting the current_quantity field. | FR2.1 (Read) |
-| 3. Enters the new, correct quantity (e.g., changes '10' to '8'). | | |
-| 4. Clicks "Save". | 5. Updates the Product.current_quantity in the database to the new value. | FR2.1 (Update) |
-| | 6. (Optional) Creates a log entry for the stock adjustment. | |
+| 1. Finds the Product to adjust. Clicks "Edit Record". | 2. Displays the product details, highlighting the current_quantity field. | FR2.1 (Read) |
+| 3. Enters the desired quantity. | | |
+| 4. Clicks "Save". | 5. Check correctness of the quantity input field ||
+|| 6. The new quantity is an allowed value, updates the quantity field of the record to the new value. | FR2.1 (Update) |
 
 ##### Scenario 11.2: (Exception) Invalid Quantity Entered
 
@@ -720,10 +720,11 @@ Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Enters an invalid quantity (e.g., "eight" or "-1"). | | |
-| 2. Clicks "Save". | 3. Validates the input and finds it is not a valid, non-negative integer. | FR2.1 |
-| | 4. Displays an error: "Quantity must be a whole number (0 or greater)." | |
-| | 5. User remains on the adjustment form. | |
+| 1. Finds the Product to adjust. Clicks "Edit Record". | 2. Displays the product details, highlighting the current_quantity field. | FR2.1 (Read) |
+| 3. Enters the desired quantity. | | |
+| 4. Clicks "Save". | 5. Check correctness of the quantity input field ||
+|| 6. The new quantity is not an allowed value, the record is not updated | |
+|| 7. Displays an error message reprompting the End User to insert a new value | |
 
 ---
 
