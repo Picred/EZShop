@@ -430,7 +430,7 @@ Steps
 
 | Scenario 5.3 | Invalid data |
 | :---: | :--- |
-| Precondition | User is in the "Add New Product" form (Scenario 6.1). |
+| Precondition | End User is in the "Add New Product" form (Scenario 6.1). |
 | Post condition | The new product is not saved. |
 
 Steps
@@ -448,41 +448,41 @@ Steps
 | Actors Involved | End User |
 | :---: | :--- |
 | Precondition | Product(s) exist in the inventory (UC5). |
-| Post condition | A new Sale (Transaction) record is created. The Product.current_quantity for sold items is decreased. |
+| Post condition | A new Sale (Transaction) record is created. The inventory table is updated to reflect the sale. |
 | Nominal Scenario | The End User manually enters a sale into the EZShop interface. |
 | Variants | N/A |
 | Exceptions | 1a. Product not found in inventory. <br> 2a. API connection failure. |
 
-##### Scenario 6.1: (Variant) Manual Sale Record
+##### Scenario 6.1: Manual Sale Record
 
 | Scenario 6.1 | Manual sale record |
 | :---: | :--- |
-| Precondition | User is logged in. |
+| Precondition | End User is logged in. |
 | Post condition | Sale record is created. Product inventory is updated. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| 1. Navigates to "Sales" and clicks "Add Manual Sale". | 2. Displays a form to select products and enter quantities and other details. | FR1.1 |
-| 3. Selects products/quantities and clicks "Save". | 4. Performs steps 3-6 from Scenario 7.1. | FR1.1, FR2.1, FR2.2 |
+| 1. Navigates to "Sales" and clicks "Add New Sale". | 2. Displays a form to create a new sale record. | FR1.1 |
+| 3. Succesfully fills in required fields and clicks "Add New Sale". | 4. Checks the validity of the input fields . | |
+|| 5. Update inventory records related to the sold products . | FR2.1 |
+|| 6. Insert a new sale record in the sales table . | FR1.1 |
 
 ##### Scenario 6.3: (Exception) Product Not Found
 
 | Scenario 6.3 | Product not found |
 | :---: | :--- |
 | Precondition | System receives sale data (manual or automatic). |
-| Post condition | Sale record is (partially) created, but inventory for the unknown item is not updated. An alert is logged. |
+| Post condition | Sale record is not created. |
 
 Steps
 
 | Actor's action | System action | FR needed |
 | :--- | :--- | :---: |
-| | 1. Receives sale data including an item with a barcode 'XYZ' that is not in the Product database. | FR1.1 |
-| | 2. Creates the Sale record. | FR1.1 |
-| | 3. Attempts to update inventory for barcode 'XYZ', but fails. | FR2.1 |
-| | 4. Logs an error: "Sold item 'XYZ' not found in inventory. Stock not updated." | |
-| | 5. (Optional) Creates a placeholder Product (see UC5, Scenario 5.2). | FR2.1 |
+| | 1. Receives sale data including an item that is not present in the inventory database. | FR1.1 |
+| | 2. Attempts to update inventory for the specified product, but fails. | FR2.1 |
+| | 3. Displays an error message. | |
 
 
 ---
