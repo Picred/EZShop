@@ -1,6 +1,8 @@
 # Graphical User Interface Prototype
 
-A working prototype of the application is available [here](https://www.figma.com/proto/TPi309x18cWVdN2yDg17lP/EZShop?node-id=2-2043&p=f&t=Z5b6PkTScvesCZXz-0&scaling=contain&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=2%3A2043). You will need a figma account to try it out. If there is any problem you can contact me at amedeo.marino@studenti.polito.it.
+A working prototype of the application is available [here](https://www.figma.com/proto/TPi309x18cWVdN2yDg17lP/EZShop?node-id=2-2043&p=f&t=Z5b6PkTScvesCZXz-0&scaling=contain&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=2%3A2043). You will need a figma account to try it out. If there is any problem you can contact me at amedeo.marino@studenti.polito.it. Here you can also see a video preview of the GUI, showing all the main functions being used:
+
+![video preview](media/user-interface/video-preview.mp4)
 
 ## Authentication
 
