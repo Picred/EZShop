@@ -29,10 +29,10 @@ Consider the EZShop project as described in your requirements document, assume t
 | -------------------- | ------------------------------- |
 | Requirement document |                25                 |
 | Design document      |                  25               |
-| code                 |                 100                |
-| code test            |                   30              |
-| api and comunication test |               70                  |
-| Menagment documents |                    25             |
+| code                 |                 110                |
+| code test            |                   70              |
+| api and comunication test |               20                  |
+|  write documentation |                    25             |
 |   total | 275 |
 
 
@@ -49,8 +49,8 @@ step 1: activities (WBS), step 2 Gantt chart
 | Database and query Development| 50 |
 | Frontend Development | 30 |
 | Testing | 100 |
-| Create a Documentation | 15 |
-| Sundry Feedback | 20 |
+| Create Documentation | 15 |
+| Some Feedback | 20 |
 | Total| 345 |
 
 
@@ -62,10 +62,12 @@ step 1: activities (WBS), step 2 Gantt chart
 
 # Summary
 
-Report here the results of the three estimation approaches. The estimates may differ. Discuss here the possible reasons for the difference
-
 |                                    | Estimated effort (ph) | Estimated duration (calendar time, relative)|
 | ---------------------------------- | ---------------- | ------------------ |
-| estimate by size                   |          540        |         ~3 weeks           |
+| estimate by size                   |          605        |         ~3 weeks           |
 | estimate by product decomposition  |          275        |         ~2 weeks           |
 | estimate by activity decomposition (Gantt) |    345      |             3 weeks       |
+
+The differences between effort-based estimation and size-based estimation come from the fact that the former assumes the work is done by a single person, 
+while the latter considers that tasks are split among multiple team members who can work in parallel.
+Overall, however, the total project duration remains similar, since it is assumed that the same number of people are working with the same availability throughout the project.
