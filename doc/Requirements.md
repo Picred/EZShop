@@ -1,15 +1,7 @@
-
-
 # Requirements Document - EZShop
 
-Date: 24/10/2025
+Date: 21/11/2025
 
-Version: 1.0.0
-
-| Version number | Change |
-| :------------: | :----: |
-| 1.0.0 | Initial release |
-| 2.0.0 | Added first drafts for business model, stakeholders, interfaces and FR| 
 
 # Contents
 
@@ -128,7 +120,6 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 | Stakeholder name       | Description                                                                                      |
 | :--------------------: | :----------------------------------------------------------------------------------------------: |
 | Developers             | EZShop developers, in charge of developing and maintaining the product                           |
-| End User             | owner of the shop, who is the one choosing to adopt EZShop for his business                      |
 | End user               | individual who directly interacts with the software, often a sale manager of some kind           |
 | Supplier               | company who supplies the shop with products of various nature                                    |
 | Cashier                | Employee of the shop who operates the Point of Sale (POS)                                        |
@@ -145,7 +136,6 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 
 ## Interfaces
 
-\<describe here each interface in the context diagram>
 |   Actor   | Logical Interface | Physical Interface |
 | :-------: | :---------------: | :----------------: |
 | End user               |        EZShop GUI      | laptop or desktop computer (display, keyboard, mouse)   |
@@ -156,9 +146,6 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 
 ## Functional Requirements
 
-\<In the form DO SOMETHING, or VERB NOUN, describe high level capabilities of the system>
-
-\<they match to high level use cases>
 
 |  ID   | Description |
 | :---: | :---------: |
@@ -185,7 +172,6 @@ Shop Owners or Accounting Managers who want a practical tool without technical c
 
 ## Non Functional Requirements
 
-\<Describe constraints on functional requirements>
 
 |   ID    | Type (efficiency, reliability, ..) | Description | Refers to |
 | :-----: | :--------------------------------: | :---------: | :-------: |
@@ -848,9 +834,6 @@ Steps
 8. Subscription: Tracks the payment status for using the EZShop platform.
 9. Payment Service: External provider used for subscription activation.
 
-\<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships>
-
-\<concepts must be used consistently all over the document, ex in use cases, requirements etc>
 
 ![Glossary](media/glossary-ezshop.png)
 
