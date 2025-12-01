@@ -32,7 +32,6 @@ async def create_product(product: ProductTypeDTO):
     if product.description is None or product.description == '':
         raise BadRequestError('description is a mandatory field')
     if product.pricePerUnit is None or product.pricePerUnit == '':
-        print("Entrato")
         raise BadRequestError('pricePerUnit type is a mandatory field')
     if len(product.productCode) < 12 or len(product.productCode) > 14:
         raise BadRequestError('productCode must be a string of 12-14 digits')
