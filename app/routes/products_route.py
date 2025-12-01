@@ -48,3 +48,20 @@ async def list_products():
     - Status code: 200 OK
     """
     return await controller.list_products()
+
+@router.get("/{product_id}", response_model=ProductTypeDTO, dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager, UserType.Cashier]))])
+async def get_product(product_id: int):
+    """
+    Retrieve a single product by ID.
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Path parameter: product_id (int)
+    - Returns: ProductDTO for the requested product
+    - Raises:
+      - NotFoundError: when the product id doesn't exist
+    - Status code: 200 OK
+    """
+    product = await controller.get_product(product_id)
+    if not product:
+        raise NotFoundError("Product not found")
+    return product

@@ -41,3 +41,15 @@ class ProductsRepository:
             await session.commit()
             await session.refresh(product)
             return product
+
+    async def get_product(self, product_id: int) -> ProductDAO | None:
+        """
+        Get product by id or throw NotFoundError if not found
+        """
+        async with await self._get_session() as session:
+            product = await session.get(ProductDAO, product_id)
+            return find_or_throw_not_found(
+                [product] if product else [],
+                lambda _: True,
+                f"Product with id '{product_id}' not found"
+            )

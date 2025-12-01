@@ -24,3 +24,8 @@ class ProductsController:
         """Get all products"""
         daos = await self.repo.list_products()
         return [productdao_to_product_type_dto(dao) for dao in daos]
+
+    async def get_product(self, product_id: int) -> Optional[ProductTypeDTO]:
+        """Get product by id - throws NotFoundError if not found"""
+        dao = await self.repo.get_product(product_id)
+        return productdao_to_product_type_dto(dao) if dao else None
