@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.DAO.product_dao import ProductDAO
 from app.utils import throw_conflict_if_found, find_or_throw_not_found
+from app.models.errors.notfound_error import NotFoundError
 from app.database.database import AsyncSessionLocal
 from typing import Optional
 
@@ -54,15 +55,15 @@ class ProductsRepository:
                 f"Product with id '{product_id}' not found"
             )
 
-    async def get_product_by_barcode(self, barcode: str) -> ProductDAO | None:
+    async def get_product_by_barcode(self, barcode: str) -> ProductDAO:
         """
         Get product by barcode or throw NotFoundError if not found
         """
         async with await self._get_session() as session:
-            result = await session.execute(select(ProductDAO).filter(ProductDAO.productCode == barcode))
-            product = result.scalars().all()
+            product = await session.execute(select(ProductDAO).filter(ProductDAO.productCode == barcode))
+            product = product.scalars().all()
             return find_or_throw_not_found(
-                [product] if product else [],
+                product,
                 lambda _: True,
                 f"Product with barcode '{barcode}' not found"
             )
