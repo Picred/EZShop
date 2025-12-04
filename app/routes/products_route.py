@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
-from app.models.DTO.product_dto import ProductTypeDTO
-from app.models.user_type import UserType
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+
+from app.config.config import ROUTES
 from app.controllers.products_controller import ProductsController
 from app.middleware.auth_middleware import authenticate_user
-from app.config.config import ROUTES
-from fastapi import Response
-from app.models.errors.notfound_error import NotFoundError
+from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.errors.bad_request import BadRequestError
-
+from app.models.errors.notfound_error import NotFoundError
+from app.models.user_type import UserType
 
 router = APIRouter(prefix=ROUTES['V1_PRODUCTS'], tags=["Products"])
 controller = ProductsController()
@@ -104,3 +105,14 @@ async def get_product_by_barcode(barcode: str):
     return product
 
 
+@router.put("/{product_id}", response_model=BooleanResponseDTO, status_code=status.HTTP_200_OK, dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))])
+async def update_user(product_id: int, product: ProductTypeDTO):
+    """
+    Update an existing product.
+    - Permissions: Administrator, ShopManager
+    - Path parameter: id (int)
+    - Request body: ProductTypeDTO (fields to update)
+    - Returns: Updated user as ProductTypeDTO
+    - Status code: 200 OK
+    """
+    return await controller.update_product(product_id, product)

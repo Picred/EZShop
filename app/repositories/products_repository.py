@@ -1,10 +1,12 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.models.DAO.product_dao import ProductDAO
-from app.utils import throw_conflict_if_found, find_or_throw_not_found
-from app.models.errors.notfound_error import NotFoundError
-from app.database.database import AsyncSessionLocal
 from typing import Optional
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.database import AsyncSessionLocal
+from app.models.DAO.product_dao import ProductDAO
+from app.models.errors.notfound_error import NotFoundError
+from app.utils import find_or_throw_not_found, throw_conflict_if_found
 
 
 class ProductsRepository:
@@ -75,3 +77,33 @@ class ProductsRepository:
         async with await self._get_session() as session:
             result = await session.execute(select(ProductDAO).filter(ProductDAO.description.ilike(f"%{description}%")))
             return result.scalars().all()
+
+    async def update_product(self, description: str, productCode: str, pricePerUnit: float, note: str, quantity: int, position: str, product_id: int) -> ProductDAO:
+            """
+            Update product information.
+            - Raises:
+                - NotFoundError if not found or ConflictError if the new productCode exists
+                - ConflictError if barcode already exists
+            """
+            async with await self._get_session() as session:
+                db_product = await session.get(ProductDAO, product_id)
+                if not db_product:
+                    raise NotFoundError(f"Product with {product_id} not found.")
+
+                result_conflict = await session.execute(select(ProductDAO).filter(ProductDAO.productCode == productCode))
+                conflicting_barcode = result_conflict.scalars().all()
+                throw_conflict_if_found(
+                    conflicting_barcode,
+                    lambda _: True,
+                    f"Barcode '{productCode}' already in use."
+                )
+
+                db_product.description = description
+                db_product.pricePerUnit = pricePerUnit
+                db_product.note = note
+                db_product.quantity = quantity
+                db_product.position = position
+
+                await session.commit()
+                await session.refresh(db_product)
+                return db_product

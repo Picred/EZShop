@@ -1,9 +1,12 @@
 from typing import List, Optional
-from app.repositories.products_repository import ProductsRepository
+
+from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.product_dto import ProductTypeDTO
-from app.services.mapper_service import productdao_to_product_type_dto
-from app.services.gtin_service import gtin
+from app.models.errors.bad_request import BadRequestError
 from app.models.errors.invalid_barcode_format_error import InvalidFormatError
+from app.repositories.products_repository import ProductsRepository
+from app.services.gtin_service import gtin
+from app.services.mapper_service import productdao_to_product_type_dto
 
 
 class ProductsController:
@@ -47,3 +50,28 @@ class ProductsController:
         """
         daos = await self.repo.get_product_by_description(description)
         return [productdao_to_product_type_dto(dao) for dao in daos]
+
+    async def update_product(self, product_id: int, product_dto: ProductTypeDTO) -> BooleanResponseDTO:
+        """Update existing product.
+        - Returns: BooleanResponseDTO
+        - Raises:
+            - BadRequestError: if product_id < 0 or fields are invalid (description, pricePerUnit, barcode).
+            - NotFoundError: if product_id not found.
+            - ConflictError: if new barcode already exists
+        """
+        if len(product_dto.productCode) < 12 or len(product_dto.productCode) > 14:
+            raise BadRequestError('productCode must be a string of 12-14 digits')
+        gtin_result = gtin(product_dto.productCode)
+        if product_id < 0 or product_id is None:
+            raise BadRequestError("product_id must be positive")
+        if not gtin_result:
+            raise BadRequestError("Wrong barcode format (GTIN)")
+        if product_dto.description is None or product_dto.description == '':
+            raise BadRequestError('description is a mandatory field')
+        if product_dto.pricePerUnit is None or product_dto.pricePerUnit == '':
+            raise BadRequestError('pricePerUnit type is a mandatory field')
+        # TODO: barcode can be updated ONLY IF there aren't returns, oreders or sales associated with it!
+        # TODO: 
+
+        updated = await self.repo.update_product(product_dto.description, product_dto.productCode, product_dto.pricePerUnit, product_dto.note, product_dto.quantity, product_dto.position, product_id)
+        return BooleanResponseDTO(success=True) if updated else BooleanResponseDTO(success=False)
