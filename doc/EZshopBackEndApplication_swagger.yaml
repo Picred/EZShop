@@ -2332,7 +2332,7 @@ paths:
     patch:
       tags: [sales]
       summary: Apply a discount to the entire sale
-      description: Sets a discount rate (a floating point number 0 >= discount > 1) for all items in an **OPEN** sale. Requires **Administrator**, **ShopManager** or **Cashier** role.
+      description: Sets a discount rate (a floating point number 0 >= discount > 1) for the entire **OPEN** sale. Requires **Administrator**, **ShopManager** or **Cashier** role.
       operationId: discountSale
       security:
         - bearerAuth: []
