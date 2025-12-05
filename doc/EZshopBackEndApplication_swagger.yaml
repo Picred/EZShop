@@ -1001,9 +1001,9 @@ paths:
         - bearerAuth: []
       description: |
         Delete product type by ID. Requires **Administrator**, **ShopManager** role.
-        A product in an active sale (OPEN or PENDING) cannot be deleted.
-        A product associated with an active orders (ISSUED or PAID) cannot be deleted.
-        A product for which an active return (OPEN or CLOSED) cannot be deleted.
+        A product in a sale (OPEN or PENDING or PAID) cannot be deleted.
+        A product in an order (ISSUED or PAID or COMPLETED) cannot be deleted.
+        A product in a return (OPEN or CLOSED or REIMBURSED) cannot be deleted.
       responses:
         '204':
           description: Deleted
@@ -1040,7 +1040,7 @@ paths:
         '404':
           description: Product Type not found
           content:
-            application/json:product code
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
