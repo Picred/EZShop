@@ -28,31 +28,44 @@ class ProductsRepository:
     async def create_product(
         self,
         description: str,
-        productCode: str,
-        pricePerUnit: float,
+        barcode: str,
+        price_per_unit: float,
         note: str,
         quantity: int,
         position: str,
     ) -> ProductDAO:
         """
-        Create product or throw ConflictError if productCode exists
+        Create product.
+        - Throws:
+            - ConflictError if barcode exists or position is free
         """
         async with await self._get_session() as session:
             result = await session.execute(
-                select(ProductDAO).filter(ProductDAO.productCode == productCode)
+                select(ProductDAO).filter(ProductDAO.barcode == barcode)
             )
             existing_products = result.scalars().all()
 
             throw_conflict_if_found(
                 existing_products,
                 lambda _: True,
-                f"Product with productCode '{productCode}' already exists",
+                f"Product with barcode '{barcode}' already exists",
+            )
+
+            result = await session.execute(
+                select(ProductDAO).filter(ProductDAO.position == position)
+            )
+            existing_products = result.scalars().all()
+
+            throw_conflict_if_found(
+                existing_products,
+                lambda _: True,
+                f"Product in position'{position}' already exists. Change it!",
             )
 
             product = ProductDAO(
                 description=description,
-                productCode=productCode,
-                pricePerUnit=pricePerUnit,
+                barcode=barcode,
+                price_per_unit=price_per_unit,
                 note=note,
                 quantity=quantity,
                 position=position,
@@ -80,7 +93,7 @@ class ProductsRepository:
         """
         async with await self._get_session() as session:
             product = await session.execute(
-                select(ProductDAO).filter(ProductDAO.productCode == barcode)
+                select(ProductDAO).filter(ProductDAO.barcode == barcode)
             )
             product = product.scalars().all()
             return find_or_throw_not_found(

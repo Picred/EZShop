@@ -20,7 +20,7 @@ def validate_product_barcode(barcode: str) -> None:
     """
     if len(barcode) < 12 or len(barcode) > 14:
         raise BadRequestError("productCode must be a string of 12-14 digits")
-    if not gtin(barcode):
+    elif not gtin(barcode):
         raise InvalidFormatError("Wrong barcode format (GTIN)")
 
 
@@ -42,7 +42,7 @@ def validate_field_is_positive(field: float, field_name: str) -> None:
     - Throws:
         - BadRequestError if field is negative.
     """
-    if field < 0:
+    if field <= 0:
         raise BadRequestError(f"'{field_name}' must be positive")
 
 

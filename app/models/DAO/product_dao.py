@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Float, Integer, String
 
 from app.database.database import Base
 
@@ -8,8 +8,8 @@ class ProductDAO(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     description = Column(String, nullable=False, unique=False)
-    productCode = Column(String, nullable=False, unique=True)
-    pricePerUnit = Column(String, nullable=False)
+    barcode = Column(String, nullable=False, unique=True)
+    price_per_unit = Column(Float, nullable=False)
     note = Column(String, nullable=True)
     quantity = Column(Integer, nullable=False)
     position = Column(String, nullable=True)

@@ -28,15 +28,15 @@ class ProductsController:
         """
 
         validate_field_is_present(product_dto.description, "description")
-        validate_field_is_present(product_dto.pricePerUnit, "pricePerUnit")
-        validate_product_barcode(product_dto.productCode)
+        validate_field_is_present(product_dto.price_per_unit, "price_per_unit")
+        validate_product_barcode(product_dto.barcode)
         validate_product_position(product_dto.position)
-        validate_field_is_positive(product_dto.pricePerUnit, "pricePerUnit")
+        validate_field_is_positive(product_dto.price_per_unit, "price_per_unit")
 
         created_product = await self.repo.create_product(
             product_dto.description,
-            product_dto.productCode,
-            product_dto.pricePerUnit,
+            product_dto.barcode,
+            product_dto.price_per_unit,
             product_dto.note,
             product_dto.quantity,
             product_dto.position,
