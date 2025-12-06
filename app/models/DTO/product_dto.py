@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ProductTypeDTO(BaseModel):
@@ -8,6 +8,6 @@ class ProductTypeDTO(BaseModel):
     description: str = None
     productCode: str = None
     pricePerUnit: float = None
-    note: str = Field(min_length=1)
+    note: str = None
     quantity: int
     position: str

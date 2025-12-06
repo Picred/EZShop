@@ -11,13 +11,18 @@ from app.models.errors.bad_request import BadRequestError
 from app.models.errors.notfound_error import NotFoundError
 from app.models.user_type import UserType
 
-router = APIRouter(prefix=ROUTES['V1_PRODUCTS'], tags=["Products"])
+router = APIRouter(prefix=ROUTES["V1_PRODUCTS"], tags=["Products"])
 controller = ProductsController()
 
-@router.post("/", 
-    response_model= ProductTypeDTO,
+
+@router.post(
+    "/",
+    response_model=ProductTypeDTO,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))])
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
 async def create_product(product: ProductTypeDTO):
     """
     Create a new product.
@@ -25,21 +30,22 @@ async def create_product(product: ProductTypeDTO):
     - Permissions: Administrator, ShopManager
     - Request body: ProductTypeDTO
     - Returns: Created product type as ProductTypeDTO
-    - Raises:
-      - BadRequestError: productCode less than 12-14 digits. When mandatory fields (description, pricePerUnit) are missing or invalid
     - Status code: 201 Product created successfully
     """
-
-    if product.description is None or product.description == '':
-        raise BadRequestError('description is a mandatory field')
-    if product.pricePerUnit is None or product.pricePerUnit == '':
-        raise BadRequestError('pricePerUnit type is a mandatory field')
-    if len(product.productCode) < 12 or len(product.productCode) > 14:
-        raise BadRequestError('productCode must be a string of 12-14 digits')
     return await controller.create_product(product)
 
 
-@router.get("/", response_model=List[ProductTypeDTO], dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager, UserType.Cashier]))])
+@router.get(
+    "/",
+    response_model=List[ProductTypeDTO],
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
 async def list_products():
     """
     List of all products.
@@ -51,7 +57,13 @@ async def list_products():
     return await controller.list_products()
 
 
-@router.get("/search", response_model=List[ProductTypeDTO], dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))])
+@router.get(
+    "/search",
+    response_model=List[ProductTypeDTO],
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
 async def get_product_by_description(query: str):
     """
     Retrieve a single product by description.
@@ -66,7 +78,17 @@ async def get_product_by_description(query: str):
     return product
 
 
-@router.get("/{product_id}", response_model=ProductTypeDTO, dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager, UserType.Cashier]))])
+@router.get(
+    "/{product_id}",
+    response_model=ProductTypeDTO,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
 async def get_product(product_id: int):
     """
     Retrieve a single product by ID.
@@ -83,7 +105,14 @@ async def get_product(product_id: int):
         raise NotFoundError("Product not found")
     return product
 
-@router.get("/barcode/{barcode}", response_model=ProductTypeDTO, dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))])
+
+@router.get(
+    "/barcode/{barcode}",
+    response_model=ProductTypeDTO,
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
 async def get_product_by_barcode(barcode: str):
     """
     Retrieve a single product by barcode.
@@ -97,7 +126,7 @@ async def get_product_by_barcode(barcode: str):
     - Status code: 200 OK
     """
     if len(barcode) < 12 or len(barcode) > 14:
-        raise BadRequestError('barcode must be a string of 12-14 digits')
+        raise BadRequestError("barcode must be a string of 12-14 digits")
 
     product = await controller.get_product_by_barcode(barcode)
     if not product:
@@ -105,8 +134,15 @@ async def get_product_by_barcode(barcode: str):
     return product
 
 
-@router.put("/{product_id}", response_model=BooleanResponseDTO, status_code=status.HTTP_200_OK, dependencies=[Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))])
-async def update_user(product_id: int, product: ProductTypeDTO):
+@router.put(
+    "/{product_id}",
+    response_model=BooleanResponseDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
+async def update_product(product_id: int, product: ProductTypeDTO):
     """
     Update an existing product.
     - Permissions: Administrator, ShopManager
