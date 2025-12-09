@@ -1,3 +1,4 @@
+from sqlalchemy import Column
 from app.models.DAO.card_dao import CardDAO
 from app.models.DAO.customer_dao import CustomerDAO
 from app.models.DAO.product_dao import ProductDAO
@@ -8,6 +9,12 @@ from app.models.DTO.error_dto import ErrorDTO
 from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.DTO.token_dto import TokenDTO
 from app.models.DTO.user_dto import UserDTO
+from app.models.DAO.sale_dao import SaleDAO
+from app.models.DAO.sold_product_dao import SoldProductDAO
+from app.models.DTO.sale_dto import SaleDTO
+from app.models.DTO.sold_product_dto import SoldProductDTO
+
+from typing import List
 
 
 def create_error_dto(code: int, message: str, name: str) -> ErrorDTO:
@@ -56,3 +63,6 @@ def productdao_to_product_type_dto(product_dao: ProductDAO) -> ProductTypeDTO:
         quantity=product_dao.quantity,
         position=product_dao.position,
     )
+
+def sale_dao_to_dto(sale_dao: SaleDAO) -> SaleDTO:
+    return SaleDTO.model_validate(sale_dao)
