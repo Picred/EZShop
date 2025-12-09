@@ -1,0 +1,51 @@
+from fastapi import APIRouter, Depends, status
+from pydantic import BaseModel
+
+from app.controllers.accounting_controller import AccountingController
+from app.repositories.accounting_repository import AccountingRepository
+
+
+from app.middleware.auth_middleware import authenticate_user
+from app.models.user_type import UserType
+
+# Apply the Auth Middleware to the entire router ---
+# This locks every endpoint in this file to Administrators only.
+router = APIRouter(
+    prefix="/balance", 
+    tags=["accounting"],
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator]))
+    ]
+)
+
+class BalanceRequest(BaseModel):
+    amount: float
+
+def get_controller():
+    repo = AccountingRepository()
+    return AccountingController(repo)
+
+@router.get("", status_code=status.HTTP_200_OK)
+async def get_current_balance(controller: AccountingController = Depends(get_controller)):
+    return {"current_balance": await controller.get_balance()}
+
+@router.post("/set", status_code=status.HTTP_200_OK)
+async def set_balance(
+    balance_data: BalanceRequest, 
+    controller: AccountingController = Depends(get_controller)
+):
+    """
+    Set the system balance.
+    - Permissions: Administrator
+    """
+    new_bal = await controller.set_balance(balance_data.amount)
+    return {"message": "Balance updated", "current_balance": new_bal}
+
+@router.post("/reset", status_code=status.HTTP_200_OK)
+async def reset_balance(controller: AccountingController = Depends(get_controller)):
+    """
+    Reset the system balance to zero.
+    - Permissions: Administrator
+    """
+    new_bal = await controller.reset_balance()
+    return {"message": "Balance reset", "current_balance": new_bal}
