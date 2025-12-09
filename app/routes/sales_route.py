@@ -65,3 +65,31 @@ async def list_sales():
     """
 
     return await controller.list_sales()
+
+
+@router.get(
+    "/{sale_id}",
+    response_model=SaleDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def get_sale_by_id(sale_id: int):
+    """
+    return a sale given its ID.
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: sale_id as int
+    - Returns: SaleDTO
+    - Status code: 200 sale retrieved succesfully
+    - Status code: 400 missing or invalid ID
+    - Status code: 401 anauthenticated
+    - Status code: 404 sale not found
+    """
+
+    return await controller.get_sale_by_id(sale_id)

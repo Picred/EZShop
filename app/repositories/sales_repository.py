@@ -31,11 +31,28 @@ class SalesRepository:
             await session.refresh(sale)
             return sale
 
-    async def list_sales(self) -> List[SaleDAO]:
+    async def list_sales(self) -> List[SaleDAO] | None:
         """
         Get all sales present in the database
         - Returns: List[SaleDAO]
         """
         async with await self._get_session() as session:
             result = await session.execute(select(SaleDAO))
-            return list(result.scalars())
+            sales = list(result.scalars())
+            return find_or_throw_not_found(
+                [sales] if sales else [],
+                lambda _: True,
+                f"There is no sale present in the database",
+            )
+
+    async def get_sale_by_id(self, sale_id: int) -> SaleDAO | None:
+        """
+        Get product by id or throw NotFoundError if not found
+        """
+        async with await self._get_session() as session:
+            sale = await session.get(SaleDAO, sale_id)
+            return find_or_throw_not_found(
+                [sale] if sale else [],
+                lambda _: True,
+                f"Sale with id '{sale_id}' not found",
+            )
