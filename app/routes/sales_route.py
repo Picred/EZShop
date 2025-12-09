@@ -29,13 +29,39 @@ controller = SalesController()
 )
 async def create_sale():
     """
-    Create a new sale.
+    Create a new empty sale.
 
     - Permissions: Administrator, ShopManager, Cashier
     - Request body: no body required
-    - Returns: Created sale as SaleDTO
+    - Returns: Empty sale as SaleDTO
     - Status code: 201 Product created successfully
     - Status code: 401 anauthenticated
     """
 
     return await controller.create_sale()
+
+
+@router.get(
+    "/",
+    response_model=List[SaleDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def list_sales():
+    """
+    List present sales.
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: no body required
+    - Returns: list of SaleDTO
+    - Status code: 200 sales retrieved succesfully
+    - Status code: 401 anauthenticated
+    """
+
+    return await controller.list_sales()

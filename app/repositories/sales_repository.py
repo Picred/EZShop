@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.database import AsyncSessionLocal
@@ -29,3 +30,12 @@ class SalesRepository:
             await session.commit()
             await session.refresh(sale)
             return sale
+
+    async def list_sales(self) -> List[SaleDAO]:
+        """
+        Get all sales present in the database
+        - Returns: List[SaleDAO]
+        """
+        async with await self._get_session() as session:
+            result = await session.execute(select(SaleDAO))
+            return list(result.scalars())
