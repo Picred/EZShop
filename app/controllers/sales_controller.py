@@ -9,10 +9,11 @@ from app.models.DTO.sale_dto import SaleDTO
 from app.models.DTO.sold_product_dto import SoldProductDTO
 from app.models.errors.bad_request import BadRequestError
 from app.models.errors.insufficient_stock_error import InsufficientStockError
-from app.models.errors.invalid_sale_status_error import InvalidSaleStatusError
+from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.sales_repository import SalesRepository
 from app.services.input_validator_service import (
+    validate_discount_rate,
     validate_field_is_positive,
     validate_field_is_present,
     validate_product_barcode,
@@ -81,7 +82,7 @@ class SalesController:
 
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status != "OPEN":
-            raise InvalidSaleStatusError("Selected sale status is not 'OPEN'")
+            raise InvalidStateError("Selected sale status is not 'OPEN'")
 
         product: ProductTypeDTO = await self.product_controller.get_product_by_barcode(
             barcode
@@ -135,7 +136,7 @@ class SalesController:
         product_to_edit: SoldProductDTO
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status != "OPEN":
-            raise InvalidSaleStatusError("Selected sale status is not 'OPEN'")
+            raise InvalidStateError("Selected sale status is not 'OPEN'")
 
         for product in sale.lines:
             if product.product_barcode == barcode:
@@ -150,5 +151,16 @@ class SalesController:
         )
         if success.success != True:
             return BooleanResponseDTO(success=False)
+
+        return BooleanResponseDTO(success=True)
+
+    async def edit_sale_discount(
+        self, sale_id: int, discount_rate: float
+    ) -> BooleanResponseDTO:
+        validate_field_is_present(str(sale_id), "sale_id")
+        validate_field_is_positive(sale_id, "sale_id")
+        validate_discount_rate(discount_rate)
+
+        await self.repo.edit_sale_discount(sale_id, discount_rate)
 
         return BooleanResponseDTO(success=True)

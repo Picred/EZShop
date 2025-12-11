@@ -8,6 +8,7 @@ from app.database.database import AsyncSessionLocal
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DAO.sold_product_dao import SoldProductDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
 from app.utils import find_or_throw_not_found
 
@@ -76,5 +77,24 @@ class SalesRepository:
 
             await session.delete(sale)
             await session.commit()
+
+            return BooleanResponseDTO(success=True)
+
+    async def edit_sale_discount(self, sale_id, discount_rate) -> BooleanResponseDTO:
+        async with await self._get_session() as session:
+            result = await session.execute(
+                select(SaleDAO).filter(SaleDAO.id == sale_id)
+            )
+
+            sale = result.scalar()
+            if sale is None:
+                raise NotFoundError("Sale id {sale_id} not found")
+
+            if sale.status != "OPEN":  # type: ignore
+                raise InvalidStateError("Sale is not 'OPEN'")
+
+            sale.discount_rate = discount_rate
+            await session.commit()
+            await session.refresh(sale)
 
             return BooleanResponseDTO(success=True)

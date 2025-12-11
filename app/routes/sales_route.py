@@ -179,3 +179,31 @@ async def delete_product_from_sale(
     """
 
     return await controller.edit_sold_product_quantity(sale_id, barcode, amount)
+
+
+@router.patch(
+    "/{sale_id}/discount",
+    response_model=BooleanResponseDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def edit_sale_discount(sale_id: int, discount_rate: float) -> BooleanResponseDTO:
+    """
+    change discount_rate field of an OPEN sale
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: sale_id as int, discount_rate as float
+    - Returns: BooleanResponseDTO
+    - Status code: 200 sale patched succesfully
+    - Status code: 400 invalid ID or discount_rate
+    - Status code: 401 anauthenticated
+    - Status code: 404 sale not found
+    - Status code: 420 invalid sale status
+    """
+    return await controller.edit_sale_discount(sale_id, discount_rate)
