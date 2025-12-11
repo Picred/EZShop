@@ -1,4 +1,5 @@
 from app.repositories.accounting_repository import AccountingRepository
+from fastapi import HTTPException
 
 class AccountingController:
 
@@ -11,11 +12,15 @@ class AccountingController:
         """
         return await self.repo.get_balance()
 
-    async def set_balance(self, amount: float) -> float:
-        """
-        Set the balance to a specific amount.
-        """
-        return await self.repo.set_balance(amount)
+async def set_balance(self, amount: float) -> float:
+    """
+    Set the balance to a specific amount.
+    """
+    if amount < 0:
+        # According to Swagger: must return 421 for negative values
+        raise HTTPException(status_code=421, detail="Balance cannot be negative.")
+
+    return await self.repo.set_balance(amount)
 
     async def reset_balance(self) -> float:
         """

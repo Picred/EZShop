@@ -4,6 +4,8 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.repositories.products_repository import ProductsRepository
+
 from app.database.database import AsyncSessionLocal
 from app.models.DAO.order_dao import OrderDAO
 from app.models.DAO.product_dao import ProductDAO
@@ -14,19 +16,17 @@ from app.models.errors.app_error import AppError
 
 class OrdersRepository:
 
-    def __init__(self, session: Optional[AsyncSession] = None):
+    def __init__(self, session: Optional[AsyncSession] = None, product_repo: Optional[ProductsRepository] = None):
         self._session = session
+        self.product_repo = product_repo or ProductsRepository(session=session)
 
     async def _get_session(self) -> AsyncSession:
         return self._session or AsyncSessionLocal()
 
-    async def create_order(
-        self,
-        product_barcode: str,
-        quantity: int,
-        price_per_unit: float,
-        status: str
-    ) -> OrderDAO:
+    async def create_order(self, product_barcode: str, quantity: int, price_per_unit: float, status: str) -> OrderDAO:
+        # Check that the product exists (will raise NotFoundError if not found)
+        await self.product_repo.get_product_by_barcode(product_barcode)
+        
         async with await self._get_session() as session:
             new_order = OrderDAO(
                 product_barcode=product_barcode,

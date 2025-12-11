@@ -27,9 +27,9 @@ def get_controller():
 
 @router.get("", status_code=status.HTTP_200_OK)
 async def get_current_balance(controller: AccountingController = Depends(get_controller)):
-    return {"current_balance": await controller.get_balance()}
+    return {"balance": await controller.get_balance()}
 
-@router.post("/set", status_code=status.HTTP_200_OK)
+@router.post("/set", status_code=status.HTTP_201_CREATED)
 async def set_balance(
     balance_data: BalanceRequest, 
     controller: AccountingController = Depends(get_controller)
@@ -39,13 +39,13 @@ async def set_balance(
     - Permissions: Administrator
     """
     new_bal = await controller.set_balance(balance_data.amount)
-    return {"message": "Balance updated", "current_balance": new_bal}
+    return {"message": "Balance updated", "balance": new_bal}
 
-@router.post("/reset", status_code=status.HTTP_200_OK)
+@router.post("/reset", status_code=status.HTTP_205_RESET_CONTENT)
 async def reset_balance(controller: AccountingController = Depends(get_controller)):
     """
     Reset the system balance to zero.
     - Permissions: Administrator
     """
     new_bal = await controller.reset_balance()
-    return {"message": "Balance reset", "current_balance": new_bal}
+    return {"message": "Balance reset", "balance": new_bal}
