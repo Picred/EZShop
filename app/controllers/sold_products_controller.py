@@ -5,7 +5,6 @@ from app.services.input_validator_service import (
     validate_field_is_positive,
     validate_field_is_present,
     validate_product_barcode,
-    validate_product_position,
 )
 from app.services.mapper_service import sold_product_dao_to_dto
 
@@ -15,7 +14,12 @@ class SoldProductsController:
         self.repo = SoldProductsRepository()
 
     async def create_sold_product(
-        self, sold_product_dto: SoldProductDTO
+        self,
+        id: int,
+        sale_id: int,
+        product_barcode: str,
+        quantity: int,
+        price_per_unit: float,
     ) -> SoldProductDTO:
         """
         Create new sold product.
@@ -24,24 +28,20 @@ class SoldProductsController:
         - Returns: sold_product_dto: SoldProductDTO
         """
 
-        validate_field_is_positive(sold_product_dto.id, "id")
-        validate_field_is_positive(sold_product_dto.sale_id, "sale_id")
-        validate_field_is_positive(sold_product_dto.quantity, "quantity")
-        validate_product_barcode(sold_product_dto.product_barcode)
-        validate_field_is_present(
-            str(sold_product_dto.price_per_unit), "price_per_unit"
-        )
-        validate_field_is_positive(sold_product_dto.price_per_unit, "price_per_unit")
-        validate_field_is_present(str(sold_product_dto.discount_rate), "discount_rate")
-        validate_field_is_positive(sold_product_dto.discount_rate, "discount_rate")
+        validate_field_is_positive(id, "id")
+        validate_field_is_positive(sale_id, "sale_id")
+        validate_field_is_positive(quantity, "quantity")
+        validate_product_barcode(product_barcode)
+        validate_field_is_present(str(price_per_unit), "price_per_unit")
+        validate_field_is_positive(price_per_unit, "price_per_unit")
 
         created_product = await self.repo.create_sold_product(
-            sold_product_dto.id,
-            sold_product_dto.sale_id,
-            sold_product_dto.product_barcode,
-            sold_product_dto.quantity,
-            sold_product_dto.price_per_unit,
-            sold_product_dto.discount_rate,
+            id,
+            sale_id,
+            product_barcode,
+            quantity,
+            price_per_unit,
+            0.0,
         )
 
         return sold_product_dao_to_dto(created_product)

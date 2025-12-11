@@ -1,15 +1,17 @@
 from typing import List, Optional
 
 from app.controllers.products_controller import ProductsController
+from app.controllers.sold_products_controller import SoldProductsController
 from app.models.DAO.sale_dao import SaleDAO
-from app.models.DAO.sold_product_dao import SoldProductDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.DTO.sale_dto import SaleDTO
 from app.models.DTO.sold_product_dto import SoldProductDTO
+from app.models.errors.bad_request import BadRequestError
+from app.models.errors.insufficient_stock_error import InsufficientStockError
+from app.models.errors.invalid_sale_status_error import InvalidSaleStatusError
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.sales_repository import SalesRepository
-from app.repositories.sold_products_repository import SoldProductsRepository
 from app.services.input_validator_service import (
     validate_field_is_positive,
     validate_field_is_present,
@@ -21,7 +23,8 @@ from app.services.mapper_service import sale_dao_to_dto
 class SalesController:
     def __init__(self):
         self.repo = SalesRepository()
-        self.sold_product_repo = SoldProductsRepository()
+        self.sold_product_controller = SoldProductsController()
+        self.product_controller = ProductsController()
 
     async def create_sale(self) -> SaleDTO:
         """
@@ -53,7 +56,7 @@ class SalesController:
 
     async def get_sale_by_id(self, sale_id: int) -> SaleDTO:
         """
-        Returns a sale given its ID
+        Returns a sale given its ID, or NotFound if not present
 
         - Parameters: sale_id as int
         - Returns: SaleDTO
@@ -76,8 +79,30 @@ class SalesController:
         validate_product_barcode(barcode)
         validate_field_is_positive(amount, "amount")
 
-        await self.sold_product_repo.create_sold_product(
-            1, sale_id, barcode, amount, 0.0, 0.0
+        sale: SaleDTO = await self.get_sale_by_id(sale_id)
+        if sale.status != "OPEN":
+            raise InvalidSaleStatusError("Selected sale status is not 'OPEN'")
+
+        product: ProductTypeDTO = await self.product_controller.get_product_by_barcode(
+            barcode
         )
 
-        return BooleanResponseDTO(success=True)
+        if product.quantity - amount < 0:
+            raise InsufficientStockError(
+                "Amount selected is greater than available stock"
+            )
+
+        if product.id == None:
+            raise BadRequestError("Invalid product")
+
+        sold_product: SoldProductDTO = (
+            await self.sold_product_controller.create_sold_product(
+                product.id, sale_id, product.barcode, amount, product.price_per_unit
+            )
+        )
+
+        return (
+            BooleanResponseDTO(success=True)
+            if sold_product
+            else BooleanResponseDTO(success=False)
+        )

@@ -6,7 +6,6 @@ from app.config.config import ROUTES
 from app.controllers.sales_controller import SalesController
 from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
-from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.DTO.sale_dto import SaleDTO
 from app.models.user_type import UserType
 from app.routes.products_route import get_product_by_barcode
