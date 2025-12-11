@@ -8,7 +8,6 @@ from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.sale_dto import SaleDTO
 from app.models.user_type import UserType
-from app.routes.products_route import get_product_by_barcode
 
 router = APIRouter(prefix=ROUTES["V1_SALES"], tags=["Sales"])
 controller = SalesController()
@@ -26,7 +25,7 @@ controller = SalesController()
         )
     ],
 )
-async def create_sale():
+async def create_sale() -> SaleDTO:
     """
     Create a new empty sale.
 
@@ -52,7 +51,7 @@ async def create_sale():
         )
     ],
 )
-async def list_sales():
+async def list_sales() -> List[SaleDTO]:
     """
     List present sales.
 
@@ -78,7 +77,7 @@ async def list_sales():
         )
     ],
 )
-async def get_sale_by_id(sale_id: int):
+async def get_sale_by_id(sale_id: int) -> SaleDTO:
     """
     return a sale given its ID.
 
@@ -106,7 +105,7 @@ async def get_sale_by_id(sale_id: int):
         )
     ],
 )
-async def attach_product(sale_id: int, barcode: str, amount: int):
+async def attach_product(sale_id: int, barcode: str, amount: int) -> BooleanResponseDTO:
     """
     Add a product specified by barcode to a specific OPEN sale
 
@@ -136,11 +135,11 @@ async def attach_product(sale_id: int, barcode: str, amount: int):
 )
 async def delete_sale(sale_id: int) -> None:
     """
-    Add a product specified by barcode to a specific OPEN sale
+    delete an existing not PAID sale
 
     - Permissions: Administrator, ShopManager, Cashier
     - Request body: sale_id as int
-    - Returns: BooleanResponseDTO
+    - Returns: None
     - Status code: 204 sale deleted succesfully
     - Status code: 400 invalid ID or sale cannot be deleted
     - Status code: 401 anauthenticated
@@ -149,3 +148,34 @@ async def delete_sale(sale_id: int) -> None:
     await controller.delete_sale(sale_id)
 
     return
+
+
+@router.delete(
+    "/{sale_id}/items",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=BooleanResponseDTO,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def delete_product_from_sale(
+    sale_id: int, barcode: str, amount: int
+) -> BooleanResponseDTO:
+    """
+    delete a product from an OPEN sale
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: sale_id as int
+    - Returns: None
+    - Status code: 202 product removed succesfully
+    - Status code: 400 invalid ID or quantity
+    - Status code: 401 anauthenticated
+    - Status code: 404 sale or product not found
+    - Status code: 420 invalid sale status
+    """
+
+    return await controller.edit_sold_product_quantity(sale_id, barcode, amount)

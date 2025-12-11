@@ -98,21 +98,31 @@ class SoldProductsRepository:
                 select(SoldProductDAO).filter(SoldProductDAO.product_barcode == barcode)
             )
 
-    async def delete_sold_product(self, id: int, sale_id: int) -> BooleanResponseDTO:
+    async def edit_sold_product_quantity(
+        self, id: int, sale_id: int, quantity: int
+    ) -> BooleanResponseDTO:
         """
-        Delete a given sold product or throw NotFoundError if not found
+        Edit a given sold product, delete it if the remaining quantity is zero
+        Throw NotFoundError if not found
         """
         async with await self._get_session() as session:
             result = await session.execute(
                 select(SoldProductDAO).filter(
-                    SoldProductDAO.id == id and SoldProductDAO.sale_id == sale_id
+                    (SoldProductDAO.id == id) & (SoldProductDAO.sale_id == sale_id)
                 )
             )
-            if not result:
-                raise NotFoundError("sold product not found")
 
-            await session.delete(result.first())
-            await session.commit()
-            await session.refresh(result)
+            sold_product: SoldProductDAO = result.scalar()
+
+            if sold_product is None:
+                raise NotFoundError("Sold product not found with the given IDs")
+
+            if sold_product.quantity + quantity <= 0:  # type: ignore
+                await session.delete(sold_product)
+                await session.commit()
+            else:
+                sold_product.quantity += quantity  # type: ignore
+                await session.commit()
+                await session.refresh(sold_product)
 
         return BooleanResponseDTO(success=True)

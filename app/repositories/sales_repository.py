@@ -7,6 +7,8 @@ from sqlalchemy.orm import selectinload
 from app.database.database import AsyncSessionLocal
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DAO.sold_product_dao import SoldProductDAO
+from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.errors.notfound_error import NotFoundError
 from app.utils import find_or_throw_not_found
 
 
@@ -63,3 +65,16 @@ class SalesRepository:
                 lambda _: True,
                 f"Sale with id '{sale_id}' not found",
             )
+
+    async def delete_sale(self, sale_id) -> BooleanResponseDTO:
+        async with await self._get_session() as session:
+            sale = await session.execute(select(SaleDAO).filter(SaleDAO.id == sale_id))
+
+            sale = sale.scalar()
+            if sale is None:
+                raise NotFoundError("sale with id {sale_id} not found")
+
+            await session.delete(sale)
+            await session.commit()
+
+            return BooleanResponseDTO(success=True)

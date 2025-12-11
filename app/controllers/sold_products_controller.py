@@ -84,13 +84,18 @@ class SoldProductsController:
 
         return sold_product_dao_to_dto(sold_product_dao[0])
 
-    async def delete_sold_product(self, id: int, sale_id: int) -> BooleanResponseDTO:
+    async def edit_sold_product_quantity(
+        self, id: int, sale_id: int, quantity: int
+    ) -> BooleanResponseDTO:
         validate_field_is_present(str(id), "product_id")
         validate_field_is_positive(id, "product_id")
         validate_field_is_present(str(sale_id), "sale_id")
         validate_field_is_positive(sale_id, "sale_id")
+        validate_field_is_present(str(quantity), "sale_id")
 
-        success: BooleanResponseDTO = await self.repo.delete_sold_product(id, sale_id)
+        success: BooleanResponseDTO = await self.repo.edit_sold_product_quantity(
+            id, sale_id, quantity
+        )
 
         return (
             BooleanResponseDTO(success=True)

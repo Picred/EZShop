@@ -113,15 +113,42 @@ class SalesController:
         if sale.status == "PAID":
             raise BadRequestError("Selected sale status is 'PAID'")
 
-        for product in sale.lines:
+        for sold_product in sale.lines:
             # TODO:Waiting for /products/{id}/quantity implementation
             # self.product_controller.update_product_quantity(product.quantity, product.id)
-            success: BooleanResponseDTO = (
-                await self.sold_product_controller.delete_sold_product(
-                    product.id, sale.id
+            success_prod: BooleanResponseDTO = (
+                await self.sold_product_controller.edit_sold_product_quantity(
+                    sold_product.id, sale.id, -sold_product.quantity
                 )
             )
-            if success.success != True:
+            if success_prod.success != True:
                 return BooleanResponseDTO(success=False)
+
+        success_sale: BooleanResponseDTO = await self.repo.delete_sale(sale_id)
+
+        return BooleanResponseDTO(success=True)
+
+    async def edit_sold_product_quantity(
+        self, sale_id: int, barcode: str, amount: int
+    ) -> BooleanResponseDTO:
+
+        product_to_edit: SoldProductDTO
+        sale: SaleDTO = await self.get_sale_by_id(sale_id)
+        if sale.status != "OPEN":
+            raise InvalidSaleStatusError("Selected sale status is not 'OPEN'")
+
+        for product in sale.lines:
+            if product.product_barcode == barcode:
+                product_to_edit = product
+
+            # TODO:Waiting for /products/{id}/quantity implementation
+            # self.product_controller.update_product_quantity(product.quantity, product.id)
+        success: BooleanResponseDTO = (
+            await self.sold_product_controller.edit_sold_product_quantity(
+                product_to_edit.id, sale.id, -amount
+            )
+        )
+        if success.success != True:
+            return BooleanResponseDTO(success=False)
 
         return BooleanResponseDTO(success=True)
