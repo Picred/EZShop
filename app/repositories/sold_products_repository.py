@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.database import AsyncSessionLocal
 from app.models.DAO.sold_product_dao import SoldProductDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.errors.conflict_error import ConflictError
 from app.models.errors.notfound_error import NotFoundError
 from app.utils import find_or_throw_not_found, throw_conflict_if_found
 
@@ -35,32 +36,17 @@ class SoldProductsRepository:
         async with await self._get_session() as session:
             result = await session.execute(
                 select(SoldProductDAO).filter(
-                    SoldProductDAO.product_barcode == product_barcode
-                    and SoldProductDAO.sale_id == sale_id
+                    (SoldProductDAO.product_barcode == product_barcode)
+                    & (SoldProductDAO.sale_id == sale_id)
                 )
             )
 
-            existing_products = list(result.scalars())
+            existing_product = result.scalar_one_or_none()
 
-            throw_conflict_if_found(
-                existing_products,
-                lambda _: True,
-                f"Product with barcode '{product_barcode}' already exists in sale {sale_id}",
-            )
-
-            result = await session.execute(
-                select(SoldProductDAO).filter(
-                    SoldProductDAO.id == id and SoldProductDAO.sale_id == sale_id
+            if existing_product is not None:
+                raise ConflictError(
+                    "Product with id '{id}' already exists in sale '{sale_id}'"
                 )
-            )
-
-            existing_products = list(result.scalars())
-
-            throw_conflict_if_found(
-                existing_products,
-                lambda _: True,
-                f"Product with id '{id}' already exists in sale {sale_id}",
-            )
 
             sold_product = SoldProductDAO(
                 id=id,
@@ -76,9 +62,7 @@ class SoldProductsRepository:
             await session.refresh(sold_product)
             return sold_product
 
-    async def get_sold_product_by_id(
-        self, product_id: int
-    ) -> list[SoldProductDAO] | None:
+    async def get_sold_product_by_id(self, product_id: int) -> list[SoldProductDAO]:
         """
         Get product(s) by id or throw NotFoundError if not found
         """
@@ -86,10 +70,14 @@ class SoldProductsRepository:
             result = await session.execute(
                 select(SoldProductDAO).filter(SoldProductDAO.id == product_id)
             )
+            products = result.scalar()
 
-    async def get_sold_product_by_barcode(
-        self, barcode: str
-    ) -> list[SoldProductDAO] | None:
+            if products is None:
+                raise NotFoundError("No products with id '{product_id}' sold")
+            else:
+                return products
+
+    async def get_sold_product_by_barcode(self, barcode: str) -> list[SoldProductDAO]:
         """
         Get product(s) by barcode or throw NotFoundError if not found
         """
@@ -97,6 +85,12 @@ class SoldProductsRepository:
             result = await session.execute(
                 select(SoldProductDAO).filter(SoldProductDAO.product_barcode == barcode)
             )
+            products = result.scalar()
+
+            if products is None:
+                raise NotFoundError("No products with barcode '{barcode}' sold")
+            else:
+                return products
 
     async def edit_sold_product_quantity(
         self, id: int, sale_id: int, quantity: int

@@ -113,8 +113,13 @@ class SalesRepository:
             if sale is None:
                 raise NotFoundError("Sale id {sale_id} not found")
 
-            if sale.status != "OPEN":  # type: ignore
-                raise InvalidStateError("Sale is not 'OPEN'")
+            if new_status == "PENDING":
+                if sale.status != "OPEN":  # type: ignore
+                    raise InvalidStateError("Sale is not 'OPEN'")
+
+            if new_status == "PAID":
+                if sale.status != "PENDING":  # type: ignore
+                    raise InvalidStateError("Sale is not 'PENDING'")
 
             sale.status = new_status  # type: ignore
             await session.commit()

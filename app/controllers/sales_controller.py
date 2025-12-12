@@ -1,9 +1,12 @@
+from math import floor
 from typing import List, Optional
 
 from app.controllers.products_controller import ProductsController
 from app.controllers.sold_products_controller import SoldProductsController
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.DTO.change_response_dto import ChangeResponseDTO
+from app.models.DTO.points_response_dto import PointsResponseDTO
 from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.DTO.sale_dto import SaleDTO
 from app.models.DTO.sold_product_dto import SoldProductDTO
@@ -201,9 +204,60 @@ class SalesController:
         if sale.status != "OPEN":
             raise InvalidStateError("Selected sale status is not 'OPEN'")
 
-        if sale.lines.count == 0:
+        if len(sale.lines) == 0:
             await self.delete_sale(sale_id)
 
         await self.repo.edit_sale_status(sale_id, "PENDING")
 
         return BooleanResponseDTO(success=True)
+
+    async def pay_sale(self, sale_id: int, cash_amount: float) -> ChangeResponseDTO:
+        validate_field_is_present(str(sale_id), "sale_id")
+        validate_field_is_positive(sale_id, "sale_id")
+        validate_field_is_positive(cash_amount, "cash_amount")
+
+        sale: SaleDTO = await self.get_sale_by_id(sale_id)
+        if sale.status != "PENDING":
+            raise InvalidStateError("Selected sale status is not 'PENDING'")
+
+        amount_needed: float = await self.get_sale_value(sale_id)
+        change: float = cash_amount - amount_needed
+        if change > 0:
+            await self.repo.edit_sale_status(sale_id, "PAID")
+        else:
+            raise BadRequestError("amount is not enough to pay the sale")
+
+        return ChangeResponseDTO(change=change)
+
+    async def get_sale_value(self, sale_id: int) -> float:
+        validate_field_is_present(str(sale_id), "sale_id")
+        validate_field_is_positive(sale_id, "sale_id")
+
+        value: float = 0.0
+        sale: SaleDTO = await self.get_sale_by_id(sale_id)
+
+        if len(sale.lines) == 0:
+            return 0.0
+
+        for product in sale.lines:
+            value += (
+                product.quantity * product.price_per_unit * (1 - product.discount_rate)
+            )
+
+        value = value * (1 - sale.discount_rate)
+        print(sale.lines)
+
+        return value
+
+    async def get_points(self, sale_id: int) -> PointsResponseDTO:
+        validate_field_is_present(str(sale_id), "sale_id")
+        validate_field_is_positive(sale_id, "sale_id")
+
+        points: int = 0
+        sale: SaleDTO = await self.get_sale_by_id(sale_id)
+
+        if sale.status != "PAID":
+            raise InvalidStateError("Selected sale is not 'PAID'")
+        points = floor(await self.get_sale_value(sale_id) / 10)
+
+        return PointsResponseDTO(points=points)
