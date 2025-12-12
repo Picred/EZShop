@@ -1,13 +1,7 @@
 from fastapi.responses import JSONResponse
+from app.models.errors.app_error import AppError
 
-class BalanceError(Exception):
+class BalanceError(AppError):
     def __init__(self, message: str):
-        self.message = message
-        self.code = 421
+        super().__init__(message, status_code=421)
         self.name = "BalanceError"
-
-    def response(self):
-        return JSONResponse(
-            status_code=self.code,
-            content={"code": self.code, "message": self.message, "name": self.name},
-        )

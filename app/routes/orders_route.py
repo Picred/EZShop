@@ -79,6 +79,7 @@ async def pay_order(order_id: int):
     dependencies=[
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
     ],
+    status_code=status.HTTP_201_CREATED,
 )
 async def record_order_arrival(order_id: int):
     """

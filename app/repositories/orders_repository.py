@@ -109,28 +109,43 @@ class OrdersRepository:
 
     async def create_and_pay_order(self, order_dao: OrderDAO) -> OrderDAO:
         """
-        Atomic transaction: Check Balance -> Deduct Cost -> Create PAID Order
+        Atomic transaction: Verify Product -> Check Balance -> Deduct Cost -> Create PAID Order
         """
         async with await self._get_session() as session:
+            # Check if Product Exists
+            # We must ensure the barcode belongs to a real product before taking money.
+            result_product = await session.execute(
+                select(ProductDAO).where(ProductDAO.barcode == order_dao.product_barcode)
+            )
+            product = result_product.scalars().first()
+            
+            if not product:
+                raise NotFoundError(f"Product with barcode {order_dao.product_barcode} not found")
+
+            # Calculate Cost
             cost = order_dao.quantity * order_dao.price_per_unit
             
+            # Get System Balance
             result = await session.execute(select(SystemInfoDAO))
             system_info = result.scalars().first()
             
-            # Lazy Init if missing
+            # Lazy Init if missing (Safety check)
             if not system_info:
                  system_info = SystemInfoDAO(balance=0.0)
                  session.add(system_info)
 
+            # Check Funds
             if system_info.balance < cost:
                 raise BalanceError("Insufficient balance for the operation")
 
+            # Execute Payment
             system_info.balance -= cost
             
-            # Force status to PAID
+            # Prepare Order (PAID immediately)
             order_dao.status = "PAID"
             order_dao.issue_date = datetime.now()
 
+            # Save
             session.add(order_dao)
             await session.commit()
             await session.refresh(order_dao)
