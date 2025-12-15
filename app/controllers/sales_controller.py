@@ -95,8 +95,6 @@ class SalesController:
             raise InsufficientStockError(
                 "Amount selected is greater than available stock"
             )
-        # TODO:Waiting for /products/{id}/quantity implementation
-        # self.product_controller.update_product_quantity(product.quantity, product.id)
 
         if product.id == None:
             raise BadRequestError("Invalid product")
@@ -106,12 +104,9 @@ class SalesController:
                 product.id, sale_id, product.barcode, amount, product.price_per_unit
             )
         )
+        await self.product_controller.update_product_quantity(product.id, -amount)
 
-        return (
-            BooleanResponseDTO(success=True)
-            if sold_product
-            else BooleanResponseDTO(success=False)
-        )
+        return BooleanResponseDTO(success=True)
 
     async def delete_sale(self, sale_id: int) -> BooleanResponseDTO:
 
@@ -120,17 +115,11 @@ class SalesController:
             raise BadRequestError("Selected sale status is 'PAID'")
 
         for sold_product in sale.lines:
-            # TODO:Waiting for /products/{id}/quantity implementation
-            # self.product_controller.update_product_quantity(product.quantity, product.id)
-            success_prod: BooleanResponseDTO = (
-                await self.sold_product_controller.edit_sold_product_quantity(
-                    sold_product.id, sale.id, -sold_product.quantity
-                )
+            await self.edit_sold_product_quantity(
+                sale.id, sold_product.product_barcode, -sold_product.quantity
             )
-            if success_prod.success != True:
-                return BooleanResponseDTO(success=False)
 
-        success_sale: BooleanResponseDTO = await self.repo.delete_sale(sale_id)
+        await self.repo.delete_sale(sale_id)
 
         return BooleanResponseDTO(success=True)
 
@@ -153,17 +142,12 @@ class SalesController:
                 "product barcode '{barcode}' not found in sale {sale_id}"
             )
         else:
-            # TODO:Waiting for /products/{id}/quantity implementation
-            # self.product_controller.update_product_quantity(
-            #    product.id, product.quantity
-            # )
-            success: BooleanResponseDTO = (
-                await self.sold_product_controller.edit_sold_product_quantity(
-                    product_to_edit.id, sale.id, -amount
-                )
+            await self.sold_product_controller.edit_sold_product_quantity(
+                product_to_edit.id, sale.id, amount
             )
-        if success.success != True:
-            return BooleanResponseDTO(success=False)
+            await self.product_controller.update_product_quantity(
+                product_to_edit.id, -amount
+            )
 
         return BooleanResponseDTO(success=True)
 
