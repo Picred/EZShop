@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select ,func
+from sqlalchemy import select ,func, desc
 from app.models.DAO.customer_dao import CustomerDAO
 from app.models.DAO.card_dao import CardDAO
 from app.models.errors.bad_request import BadRequestError
@@ -102,10 +102,11 @@ class CustomerRepository:
                     raise NotFoundError("Card not found")
                 result_conflict = await session.execute(select(CustomerDAO).filter(CustomerDAO.cardId == updated_cardId))
                 result_conflict=result_conflict.scalars().first()
-                if not(result_conflict is None or result_conflict.id==customer_id):
+                if result_conflict is not None and result_conflict.id!=db_customer.id : #if there is a conflict and the customer id are same
                     raise ConflictError("Card with id "+updated_cardId+" is already attached to a customer")
                 db_customer.cardId=updated_cardId
-                db_card.points=updated_points
+                if updated_points>0:
+                    db_card.points=updated_points
 
             await session.commit()
             await session.refresh(db_customer,attribute_names=["card"])
@@ -128,13 +129,13 @@ class CustomerRepository:
             await session.commit()
             return True
 #card
-    async def create_card(self, cardId: str) -> CardDAO:
+    async def create_card(self) -> CardDAO:
         """
         Create card
         """
         
         async with await self._get_session() as session:
-            id_db= await session.execute(select(CardDAO).order_by(CardDAO.cardId))
+            id_db= await session.execute(select(CardDAO).order_by(desc(CardDAO.cardId)))
             id_db= id_db.scalars().first()
             id=int(id_db.cardId)
             id=id+1
@@ -156,7 +157,6 @@ class CustomerRepository:
             if card is None or customer is None:
                 return None
             if result_conflict is not None:
-                print(result_conflict)
                 raise ConflictError("Card with id "+card_id+" is already attached to a customer")
             customer.cardId=card_id
             await session.commit()

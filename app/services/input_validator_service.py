@@ -67,3 +67,12 @@ def validate_product_position(position: str) -> None:
 def custumer_input(customer: CustomerCreateDTO) ->None:
     if not customer.name:
         raise BadRequestError("Customer name is required")
+    
+def control_id(id: list[str]):
+    for i in id:
+        if not(i.isdigit()):
+            raise BadRequestError("Invalid ID")
+
+def len_control(id: str, l: int):
+    if len(id)>l:
+        raise BadRequestError("Invalid card ID")

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
-from app.models.DTO.customer_dto import CustomerDTO, CustomerResponseDTO, CustomerCreateDTO
+from app.models.DTO.customer_dto import CustomerResponseDTO, CustomerCreateDTO, CustomerUpdateDTO
 from app.models.user_type import UserType
 from app.controllers.customer_controller import CustomerController
 from app.config.config import ROUTES
@@ -63,13 +63,13 @@ async def get_customer(customer_id:str):
 @router.put("/{customer_id}", response_model=CustomerResponseDTO, 
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(authenticate_user([UserType.Administrator,UserType.Cashier,UserType.ShopManager]))])
-async def update_customer(customer_id: int, customer: CustomerDTO):
+async def update_customer(customer_id: str, customer: CustomerUpdateDTO):
     """
     Update an existing customer.
 
     - Permissions: all
     - Path parameter: customer_id (int)
-    - Request body: CurstomerDTO (fields to update)
+    - Request body: CustomerUpdateDTO (fields to update)
     - Returns: Updated customer as CustomerResponseDTO
     - Raises:
       - NotFoundError: when the customer to update does not exist
@@ -130,8 +130,6 @@ async def attach_card(customer_id: str, card_id: str):
       - BadRequestError: when card_id isn't integer string
     - Status code: 201 Created
     """
-    if not card_id.isdigit():
-        raise BadRequestError("Card ID must be an integer string")
     updated = await controller.attach_card(customer_id, card_id)
     if not updated:
         raise NotFoundError("Customer or Card not found")

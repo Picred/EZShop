@@ -45,7 +45,7 @@ def customerdao_to_responsedto(
 
 
 def carddao_to_responsedto(card_dao: CardDAO) -> CardDTO:
-    return CardDTO(cardId=card_dao.cardId, points=card_dao.points)
+    return CardDTO(card_id=card_dao.cardId, points=card_dao.points)
 
 
 def productdao_to_product_type_dto(product_dao: ProductDAO) -> ProductTypeDTO:
