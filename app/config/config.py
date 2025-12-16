@@ -28,6 +28,7 @@ URL_PRODUCTS = "/products"
 URL_SALES = "/sales"
 URL_ORDERS = "/orders"
 URL_ACCOUNTING = "/balance"
+URL_RETRUNS = "/returns"
 
 ROUTES = {
     "V1_AUTH": APP_V1_BASE_URL + URL_AUTH,
@@ -38,6 +39,7 @@ ROUTES = {
     "V1_ORDERS": APP_V1_BASE_URL + URL_ORDERS,
     "V1_ACCOUNTING": APP_V1_BASE_URL + URL_ACCOUNTING,
     "V1_GENERAL": APP_V1_BASE_URL,
+    "V1_RETURNS": APP_V1_BASE_URL + URL_RETRUNS
 }
 
 # App configuration

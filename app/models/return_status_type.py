@@ -1,6 +1,6 @@
 from enum import Enum
 
 class ReturnStatus(str, Enum):
-    OPEN = "Open"
-    CLOSED = "Closed"
-    REIMBURSED = "Reimbursed"
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+    REIMBURSED = "REIMBURSED"

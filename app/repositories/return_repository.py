@@ -3,9 +3,13 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
+from sqlalchemy.orm import selectinload
 
 from app.database.database import AsyncSessionLocal
 from app.models.DAO.return_transaction_dao import ReturnTransactionDAO
+from app.models.DAO.returned_item_dao import ReturnedItemDAO
+from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
 from app.utils import find_or_throw_not_found, throw_conflict_if_found
 from app.models.return_status_type import ReturnStatus
@@ -31,7 +35,7 @@ class ReturnRepository:
             
             return_transaction = ReturnTransactionDAO(
                 sale_id = sale_id,
-                status=ReturnStatus.OPEN,
+                status=ReturnStatus.OPEN, 
                 created_at=func.now(),
                 lines=[],
             )
@@ -40,3 +44,51 @@ class ReturnRepository:
             await session.commit()
             await session.refresh(return_transaction)
             return return_transaction
+
+    async def list_returns(self) -> list[ReturnTransactionDAO]:
+        """
+        List all Return Transactions.
+        - Returns: list of ReturnTransactionDAO
+        """
+        async with await self._get_session() as session:
+            result = await session.execute(
+                select(ReturnTransactionDAO).options(selectinload(ReturnTransactionDAO.lines))
+            )
+            returns = list(result.scalars())
+            return find_or_throw_not_found(
+                [returns] if returns else [],
+                lambda _: True,
+                f"There is no return present in the database",
+            )
+            
+    async def get_return_by_id(self, return_id: int) -> ReturnTransactionDAO | None:
+        """
+        Get return by id or throw NotFoundError if not found
+        """
+        async with await self._get_session() as session:
+            return_transaction = await session.execute(
+                select(ReturnTransactionDAO)
+                .filter(ReturnTransactionDAO.id == return_id)
+                .options(selectinload(ReturnTransactionDAO.lines))
+            )
+            return_transaction = return_transaction.scalars().first()
+            return find_or_throw_not_found(
+                [return_transaction] if return_transaction else [],
+                lambda _: True,
+                f"Return with id '{return_id}' not found",
+            )
+
+    async def delete_return(self, return_id: int) -> BooleanResponseDTO:
+        async with await self._get_session() as session:
+            return_transaction = await session.execute(
+                select(ReturnTransactionDAO)
+                .filter(ReturnTransactionDAO.id == return_id))
+
+            return_transaction = return_transaction.scalar()
+            if return_transaction is None:
+                raise NotFoundError("sale with id {return_id} not found")
+
+            await session.delete(return_transaction)
+            await session.commit()
+
+            return BooleanResponseDTO(success=True)

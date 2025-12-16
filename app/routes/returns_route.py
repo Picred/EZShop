@@ -6,7 +6,7 @@ from app.config.config import ROUTES
 from app.controllers.return_controller import ReturnController
 from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
-from ezshop.app.models.DTO.return_transaction_dto import ReturnTransactionDTO
+from app.models.DTO.return_transaction_dto import ReturnTransactionDTO
 from app.models.user_type import UserType
 
 '''
@@ -17,7 +17,7 @@ ToDo:
 4. Implement routes
 '''
 
-router = APIRouter(prefix=ROUTES["V1_PRODUCTS"], tags=["Products"])
+router = APIRouter(prefix=ROUTES["V1_RETURNS"], tags=["Returns"])
 controller = ReturnController()
 
 @router.post(
@@ -28,13 +28,99 @@ controller = ReturnController()
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager, UserType.Cashier]))
     ],
 )
-async def create_return_transaction(return_transaction: ReturnTransactionDTO):
+async def create_return_transaction(sale_id: int) -> ReturnTransactionDTO:
     """
-    Create a new return transaction.
+    Create a new empty return transaction.
 
     - Permissions: Administrator, ShopManager, Cashier
-    - Request body: ReturnDTO
+    - Request body: ReturnTransactionDTO
     - Returns: Created return transaction type as ReturnDTO
     - Status code: 201 Return Transaction created successfully
     """
-    return await controller.create_return_transaction(return_transaction)
+    return await controller.create_return_transaction(sale_id=sale_id)
+
+
+@router.get(
+    "/",
+    response_model=List[ReturnTransactionDTO],
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def list_returns() -> List[ReturnTransactionDTO]:
+    """
+    List present returns.
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: no body required
+    - Returns: list of ReturnTransactionDTO
+    - Status code: 200 returns retrieved succesfully
+    - Status code: 401 unauthenticated
+    """
+
+    return await controller.list_returns()
+
+@router.get(
+    "/{return_id}",
+    response_model=ReturnTransactionDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def get_return_by_id(return_id: int) -> ReturnTransactionDTO:
+    """
+    return a return transaction given its ID.
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: return_id as int
+    - Returns: ReturnTransactionDTO
+    
+    TODO:
+    
+    - Status code: 200 return retrieved succesfully
+    - Status code: 400 missing or invalid ID
+    - Status code: 401 unauthenticated
+    - Status code: 404 return not found
+    """
+
+    return await controller.get_return_by_id(return_id)
+
+@router.delete(
+    "/{return_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def delete_return(return_id: int) -> None:
+    """
+    delete an existing not REIMBURSED return
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: return_id as int
+    - Returns: None
+    
+    TODO:
+    
+    - Status code: 204 return deleted succesfully
+    - Status code: 400 invalid ID or return cannot be deleted
+    - Status code: 401 unauthenticated
+    - Status code: 404 return or sale not found
+    """
+    await controller.delete_return(return_id)
+
+    return

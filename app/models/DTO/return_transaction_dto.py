@@ -1,8 +1,8 @@
 from typing import Optional, List
 
 from pydantic import BaseModel
-from return_status_type import ReturnStatus
-from ezshop.app.models.DTO.returned_item_dto import ReturnedItemDTO
+from app.models.return_status_type import ReturnStatus
+from app.models.DTO.returned_item_dto import ReturnedItemDTO
 from datetime import datetime
 
 
