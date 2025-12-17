@@ -3,7 +3,7 @@ stages:
 
 test-all:
   stage: test
-  image: python:3.13
+  image: python:3.12
   tags:
     - geocontrol
   before_script:
