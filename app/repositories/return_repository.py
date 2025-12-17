@@ -135,4 +135,37 @@ class ReturnRepository:
             await session.refresh(returned_item)
             return returned_item
         
-    
+    async def close_return_transaction(
+        self,
+        return_id: int
+    ) -> BooleanResponseDTO:
+        """
+        Close a return transaction.
+        - Throws:
+            - InvalidStateError if the return is not in OPEN status
+        """
+        async with await self._get_session() as session:
+            result = await session.execute(
+                select(ReturnTransactionDAO).filter(
+                    ReturnTransactionDAO.id == return_id
+                )
+            )
+
+            return_transaction: ReturnTransactionDAO = result.scalar_one_or_none()
+
+            if return_transaction is None:
+                raise NotFoundError(f"Return transaction with id '{return_id}' not found")
+
+            if return_transaction.status != ReturnStatus.OPEN:
+                raise InvalidStateError("Only return transactions with status 'OPEN' can be closed")
+            
+            if len(return_transaction.lines) == 0:
+                await session.delete(return_transaction)
+                await session.commit()
+                raise InvalidStateError("Return transaction contains no returned products and will be deleted")
+
+            return_transaction.status = ReturnStatus.CLOSED
+            await session.commit()
+            await session.refresh(return_transaction)
+
+            return BooleanResponseDTO(success=True)

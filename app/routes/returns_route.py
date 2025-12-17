@@ -218,3 +218,30 @@ async def delete_product_from_return(return_id: int, barcode: str, amount: int) 
     return await controller.edit_quantity_of_returned_product(return_id, barcode, amount)
 
     
+@router.patch(
+    "/{return_id}/close",
+    response_model=BooleanResponseDTO,
+    status_code=status.HTTP_200_OK,
+    dependencies=[
+        Depends(
+            authenticate_user(
+                [UserType.Administrator, UserType.ShopManager, UserType.Cashier]
+            )
+        )
+    ],
+)
+async def close_return_transaction(return_id: int) -> BooleanResponseDTO:
+    """
+    Turn an OPEN return status to CLOSED.
+    It will instead delete the return if there are no products registered to the return
+
+    - Permissions: Administrator, ShopManager, Cashier
+    - Request body: return_id as int
+    - Returns: BooleanResponseDTO
+    - Status code: 200 return closed succesfully
+    - Status code: 400 invalid id
+    - Status code: 401 unauthenticated
+    - Status code: 404 return not found
+    - Status code: 420 return already closed
+    """
+    return await controller.close_return_transaction(return_id)

@@ -45,7 +45,7 @@ class ReturnController:
         sale: SaleDTO = await self.sales_controller.get_sale_by_id(
             sale_id
         )
-        if sale_id.status != "PAID":
+        if sale.status != "PAID":
             raise InvalidStateError("Selected sale status is not 'PAID'")
 
         new_return_transaction: ReturnTransactionDAO = await self.repo.create_return_transaction(
@@ -188,3 +188,39 @@ class ReturnController:
             if returned_product
             else BooleanResponseDTO(success=False)
         )
+        
+        
+        
+    async def close_return_transaction(self, return_id: int) -> BooleanResponseDTO:
+        """
+        Close a return transaction.
+
+        - Parameters: return_id as int
+        - Returns: BooleanResponseDTO
+        """
+        validate_field_is_positive(return_id, "return_id")
+        
+        return_transaction = await self.get_return_by_id(return_id)
+        if return_transaction.status != "OPEN":
+            raise InvalidStateError("Selected return status is not 'OPEN'")
+ 
+        
+        response: BooleanResponseDTO = await self.repo.close_return_transaction(return_id)
+        '''
+        update inventory:
+        increase quantity of each returned product in the inventory
+        '''
+        if response.success:
+            for returned_product in return_transaction.lines:
+                product: ProductTypeDTO = await self.product_controller.get_product_by_barcode(
+                    returned_product.product_barcode
+                )
+                if product.id is None:
+                    raise BadRequestError("Invalid product")
+                await self.product_controller.update_product_quantity(
+                    product.id, returned_product.quantity
+                )
+
+        return response
+      
+        
