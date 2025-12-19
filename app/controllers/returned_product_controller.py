@@ -2,6 +2,7 @@ from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.returned_products_repository import ReturnedProductsRepository
 from app.models.DTO.returned_product_dto import ReturnedProductDTO
+from app.models.DAO.returned_product_dao import ReturnedProductDAO
 from app.services.input_validator_service import (
     validate_discount_rate,
     validate_field_is_positive,
@@ -10,6 +11,7 @@ from app.services.input_validator_service import (
 )
 from app.services.mapper_service import returned_product_dao_to_dto
 from typing import List
+
 
 
 class ReturnedProductController:
@@ -46,7 +48,31 @@ class ReturnedProductController:
         )
 
         return returned_product_dao_to_dto(created_product)
+    
+    async def edit_quantity_of_returned_product(
+        self, return_id: int, barcode: str, amount: int
+    ) -> ReturnedProductDTO:
+        """
+        Edit a given returned product quantity, delete it if the remaining quantity is zero
+        Throw NotFoundError if not found
 
+        - Parameters: return_id as int, barcode as str, amount as int
+        - Returns: ReturnedProductDTO
+        - Throws:
+            - NotFoundError if return_id/barcode not found
+        """
+
+        validate_field_is_positive(return_id, "return_id")
+        validate_field_is_present(barcode, "barcode")
+        validate_product_barcode(barcode)
+        validate_field_is_positive(amount, "amount")
+
+        edited_product_dao: ReturnedProductDAO = await self.repo.edit_quantity_of_returned_product(
+            return_id, barcode, amount
+        )
+
+        return returned_product_dao_to_dto(edited_product_dao)
+    
     async def get_returned_products_by_id(self, product_id: int) -> List[ReturnedProductDTO]:
         """
         Get returned product by id.

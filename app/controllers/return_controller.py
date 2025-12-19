@@ -35,7 +35,7 @@ class ReturnController:
         self.returnedProductController = ReturnedProductController()
         self.product_controller = ProductsController()
         self.sales_controller = SalesController()
-        self.accounting_controller = AccountingController()
+        #self.accounting_controller = AccountingController()
         
 
     async def create_return_transaction(self, sale_id: int) -> ReturnTransactionDTO:
@@ -47,6 +47,7 @@ class ReturnController:
         """
         validate_field_is_present(sale_id, "sale_id")
         validate_field_is_positive(sale_id, "sale_id")
+        
         sale: SaleDTO = await self.sales_controller.get_sale_by_id(
             sale_id
         )
@@ -86,6 +87,7 @@ class ReturnController:
         """
         validate_field_is_present(return_id, "return_id")
         validate_field_is_positive(return_id, "return_id")
+        
         return_transaction: ReturnTransactionDAO = await self.repo.get_return_by_id(return_id)
         return return_transaction_dao_to_return_transaction_dto(return_transaction)
     
@@ -123,6 +125,7 @@ class ReturnController:
         - Returns: BooleanResponseDTO
         """
         validate_field_is_positive(return_id, "return_id")
+        validate_field_is_present(return_id, "return_id")
         validate_field_is_present(barcode, "barcode")
         validate_product_barcode(barcode)
         validate_field_is_positive(amount, "amount")
@@ -186,7 +189,7 @@ class ReturnController:
         if return_transaction.status != "OPEN":
             raise InvalidStateError("Cannot remove items from a closed return")
 
-        returned_product: ReturnedProductDTO = await self.returnedProductRepository.edit_quantity_of_returned_product(
+        returned_product: ReturnedProductDTO = await self.returnedProductController.edit_quantity_of_returned_product(
             return_id, barcode, amount
         )
 

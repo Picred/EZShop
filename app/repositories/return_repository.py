@@ -162,9 +162,9 @@ class ReturnRepository:
             if len(return_transaction.lines) == 0:
                 await session.delete(return_transaction)
                 await session.commit()
-                raise InvalidStateError("Return transaction contains no returned products and will be deleted")
 
             return_transaction.status = ReturnStatus.CLOSED
+            return_transaction.closed_at = func.now()
             await session.commit()
             await session.refresh(return_transaction)
 
