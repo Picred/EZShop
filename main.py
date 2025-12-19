@@ -19,6 +19,7 @@ from app.routes import (
     products_route,
     sales_route,
     user_route,
+    returns_route
 )
 
 logger = getLogger(__name__)
@@ -52,6 +53,7 @@ app.include_router(products_route.router)
 app.include_router(sales_route.router)
 app.include_router(orders_route.router)
 app.include_router(accounting_route.router)
+app.include_router(returns_route.router)
 
 app.add_exception_handler(AppError, error_handler)
 app.add_exception_handler(Exception, error_handler)

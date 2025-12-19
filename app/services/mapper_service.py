@@ -4,6 +4,10 @@ from app.models.DAO.product_dao import ProductDAO
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DAO.sold_product_dao import SoldProductDAO
 from app.models.DAO.user_dao import UserDAO
+from app.models.DAO.return_transaction_dao import ReturnTransactionDAO
+from app.models.DTO.return_transaction_dto import ReturnTransactionDTO
+from app.models.DTO.returned_product_dto import ReturnedProductDTO
+from app.models.DAO.returned_product_dao import ReturnedProductDAO
 from app.models.DTO.card_dto import CardDTO
 from app.models.DTO.customer_dto import CustomerDTO
 from app.models.DTO.error_dto import ErrorDTO
@@ -12,6 +16,7 @@ from app.models.DTO.sale_dto import SaleDTO
 from app.models.DTO.sold_product_dto import SoldProductDTO
 from app.models.DTO.token_dto import TokenDTO
 from app.models.DTO.user_dto import UserDTO
+
 
 
 def create_error_dto(code: int, message: str, name: str) -> ErrorDTO:
@@ -68,3 +73,20 @@ def sale_dao_to_dto(sale_dao: SaleDAO) -> SaleDTO:
 
 def sold_product_dao_to_dto(sold_product_dao: SoldProductDAO) -> SoldProductDTO:
     return SoldProductDTO.model_validate(sold_product_dao)
+
+def return_transaction_dao_to_return_transaction_dto(return_transaction_dao: ReturnTransactionDAO) -> ReturnTransactionDTO:
+    return ReturnTransactionDTO.model_validate(return_transaction_dao)
+
+def returned_product_dao_to_dto(returned_product_dao: ReturnedProductDAO) -> ReturnedProductDTO:
+    return ReturnedProductDTO.model_validate(returned_product_dao)
+
+'''
+    return ReturnTransactionDTO(
+        id=return_transaction_dao.id,
+        sale_id=return_transaction_dao.sale_id,
+        status=return_transaction_dao.status,
+        created_at=return_transaction_dao.created_at,
+        closed_at=return_transaction_dao.closed_at,
+        lines=return_transaction_dao.lines
+    )
+'''
