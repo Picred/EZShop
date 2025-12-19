@@ -46,7 +46,7 @@ class ReturnedProductsRepository:
 
             if existing_product is not None:
                 raise ConflictError(
-                    "ReturnedProduct with id '{id}' already exists in return transaction '{return_id}'"
+                    f"ReturnedProduct with id '{id}' already exists in return transaction '{return_id}'"
                 )
 
             returned_product = ReturnedProductDAO(
