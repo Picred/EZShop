@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, status
 
 from app.controllers.accounting_controller import AccountingController
 from app.config.config import ROUTES
@@ -34,10 +34,9 @@ async def set_balance(amount: float):
     return BooleanResponseDTO(success=True)
 
 @router.post("/reset", status_code=status.HTTP_205_RESET_CONTENT)
-async def reset_balance():
+async def reset_balance() -> None:
     """
     Reset the system balance to zero.
     - Permissions: Administrator
     """
     await controller.reset_balance()
-    return Response(status_code=status.HTTP_205_RESET_CONTENT)
