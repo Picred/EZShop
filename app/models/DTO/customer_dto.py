@@ -1,29 +1,24 @@
-from typing import Optional
-
 from pydantic import BaseModel
-
-from .card_dto import CardDTO, CardUpdateDTO
-
+from typing import Optional
+from .card_dto import CardDTO,CardUpdateDTO
 
 class CustomerDTO(BaseModel):
     id: Optional[int] = None
-    name: str
-    card: Optional[CardDTO] = None
+    name: str 
+    card: Optional[CardDTO]=None
 
 
 class CustomerResponseDTO(BaseModel):
     id: Optional[int] = None
     name: str
-    card: Optional[CardDTO] = None
-
+    card: Optional[CardDTO]=None
 
 class CustomerCreateDTO(BaseModel):
     id: Optional[int] = None
-    name: Optional[str] = None
+    name: Optional[str]=None 
     card: Optional[CardDTO] = None
-
 
 class CustomerUpdateDTO(BaseModel):
     id: Optional[int] = None
-    name: str
-    card: Optional[CardUpdateDTO] = None
+    name: str 
+    card: Optional[CardUpdateDTO]
