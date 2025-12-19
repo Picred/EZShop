@@ -109,8 +109,6 @@ async def delete_sale(sale_id: int) -> None:
     """
     await controller.delete_sale(sale_id)
 
-    return
-
 
 @router.delete(
     "/{sale_id}/items",
@@ -125,7 +123,7 @@ async def edit_product_quantity(
 
     - Permissions: Administrator, ShopManager, Cashier
     - Request body: sale_id as int
-    - Returns: None
+    - Returns: BooleanResponseDTO
     - Status code: 202 product removed succesfully
     - Status code: 400 invalid ID or quantity
     - Status code: 401 unauthenticated
