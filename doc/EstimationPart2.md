@@ -2,13 +2,7 @@
 
 
 
-Goal of this document is to compare actual effort and size of the project, vs the estimates made in task1.
-
-## Computation of size
-
-
-
-Goal of this document is to compare actual effort and size of the project, vs the estimates made in task1.
+Goal of this document is to compare actual effort, size and productivity of the project, vs the estimates made in task1.
 
 ## Computation of size
 
