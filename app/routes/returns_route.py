@@ -88,7 +88,6 @@ async def get_return_by_id(return_id: int) -> ReturnTransactionDTO:
     - Status code: 401 unauthenticated
     - Status code: 404 return not found
     """
-
     return await controller.get_return_by_id(return_id)
 
 @router.delete(
