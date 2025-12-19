@@ -1,9 +1,13 @@
 import re
 
+from app.models.DTO.customer_dto import (
+    CustomerCreateDTO,
+    CustomerDTO,
+    CustomerUpdateDTO,
+)
 from app.models.errors.bad_request import BadRequestError
 from app.models.errors.invalid_barcode_format_error import InvalidFormatError
 from app.services.gtin_service import gtin
-from app.models.DTO.customer_dto import CustomerCreateDTO
 
 
 def validate_id(id: int):
@@ -64,15 +68,20 @@ def validate_product_position(position: str) -> None:
             "'position' pattern must be 'aisle-shelf-level' or empty string to clear it."
         )
 
-def custumer_input(customer: CustomerCreateDTO) ->None:
+
+def customer_input(
+    customer: CustomerCreateDTO | CustomerUpdateDTO | CustomerDTO,
+) -> None:
     if not customer.name:
         raise BadRequestError("Customer name is required")
-    
+
+
 def control_id(id: list[str]):
     for i in id:
-        if not(i.isdigit()):
+        if not (i.isdigit()):
             raise BadRequestError("Invalid ID")
 
+
 def len_control(id: str, l: int):
-    if len(id)>l:
+    if len(id) > l:
         raise BadRequestError("Invalid card ID")
