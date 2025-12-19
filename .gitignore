@@ -10,3 +10,4 @@ app/data/database.sqlite
 *.idea
 *.vscode
 .venv
+reports/
