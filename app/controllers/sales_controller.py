@@ -1,7 +1,6 @@
 from math import floor
 from typing import List, Optional
 
-from app.controllers.products_controller import ProductsController
 from app.controllers.sold_products_controller import SoldProductsController
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
@@ -28,7 +27,6 @@ class SalesController:
     def __init__(self):
         self.repo = SalesRepository()
         self.sold_product_controller = SoldProductsController()
-        self.product_controller = ProductsController()
 
     async def create_sale(self) -> SaleDTO:
         """
@@ -70,7 +68,7 @@ class SalesController:
         return sale_dao_to_dto(sale)
 
     async def attach_product(
-        self, sale_id: int, barcode: str, amount: int
+        self, sale_id: int, barcode: str, amount: int, products_controller
     ) -> BooleanResponseDTO:
         """
         Attach a product to a given sale
@@ -87,7 +85,7 @@ class SalesController:
         if sale.status != "OPEN":
             raise InvalidStateError("Selected sale status is not 'OPEN'")
 
-        product: ProductTypeDTO = await self.product_controller.get_product_by_barcode(
+        product: ProductTypeDTO = await products_controller.get_product_by_barcode(
             barcode
         )
 

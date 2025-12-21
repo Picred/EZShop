@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 
 from app.config.config import ROUTES
-from app.controllers.sales_controller import SalesController
+from app.controllers_instances import products_controller, sales_controller
 from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.change_response_dto import ChangeResponseDTO
@@ -12,7 +12,7 @@ from app.models.DTO.sale_dto import SaleDTO
 from app.models.user_type import UserType
 
 router = APIRouter(prefix=ROUTES["V1_SALES"], tags=["Sales"])
-controller = SalesController()
+controller = sales_controller
 
 
 @router.post(
@@ -121,7 +121,9 @@ async def attach_product(sale_id: int, barcode: str, amount: int) -> BooleanResp
     - Status code: 410 invalid sale status
     """
 
-    return await controller.attach_product(sale_id, barcode, amount)
+    return await controller.attach_product(
+        sale_id, barcode, amount, products_controller
+    )
 
 
 @router.delete(
