@@ -4,11 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.database import AsyncSessionLocal
-from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.DAO.returned_product_dao import ReturnedProductDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.errors.bad_request import BadRequestError
 from app.models.errors.conflict_error import ConflictError
+from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
 from app.utils import find_or_throw_not_found, throw_conflict_if_found
 
@@ -102,18 +102,22 @@ class ReturnedProductsRepository:
 
     async def get_returned_products_by_id(self, product_id: int) -> list[ReturnedProductDAO]:
         """
-        Get product(s) by id or throw NotFoundError if not found
+        Get product by id or throw NotFoundError if not found
         """
+
+        
         async with await self._get_session() as session:
             result = await session.execute(
                 select(ReturnedProductDAO).filter(ReturnedProductDAO.id == product_id)
             )
-            products = result.scalar()
+            product = result.scalars().first()
 
-            if products is None:
-                raise NotFoundError("No products with id '{product_id}' returned")
-            else:
-                return products
+            if not product:
+                raise NotFoundError(
+                    f"Product with id '{product_id}' never returned."
+                )
+
+            return product
             
     async def get_returned_product_by_barcode(self, barcode: str) -> list[ReturnedProductDAO]:
         """

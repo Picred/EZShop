@@ -138,14 +138,15 @@ class ProductsController:
         product_id: int,
         product_dto: ProductUpdateDTO,
         sold_products_controller,
-        # orders_controller,
-        # returns_controller,
+        orders_controller,
+        returned_products_controller,
     ) -> BooleanResponseDTO:
         """
         Update existing product.
         - Returns: BooleanResponseDTO
         - Throws:
             - BadRequestError: if product_id < 0 or fields are invalid (description, price_per_unit, barcode).
+            - InvalidStateError: if there are sales, orders, returns associated with the product to update.
         """
 
         validate_field_is_positive(product_id, "product_id")
@@ -158,23 +159,50 @@ class ProductsController:
         if product_dto.quantity is not None:
             validate_field_is_positive(product_dto.quantity, "quantity")
 
-        # The product has NO sales associated with it.
         try:
-            await sold_products_controller.get_sold_product_by_id(product_id)
-            print(f"Product with {product_id} is associated with a sale")
-            raise InvalidStateError(
-                f"There is an existing sale for 'product_id' '{product_id}'"
+            # The product has NO sales associated with it.
+            result = await sold_products_controller.get_sold_product_by_id(product_id)
+
+            if result:
+                raise InvalidStateError(
+                    f"There is an existing SALE for 'product_id' '{product_id}'"
+                )
+        except NotFoundError:
+            pass
+        
+        
+        try:
+            # The product has NO orders associated with it.
+            product_db = await self.get_product(product_id)
+            product_barcode_on_db = product_db.barcode
+
+            existing_order = await orders_controller.get_order_by_product_barcode(
+                product_barcode_on_db
             )
-            # TODO: The product has NO orders associated with it.
+            if existing_order:
+                raise InvalidStateError(
+                    f"There is an existing ORDER for 'product_id' '{product_id}'"
+                )
+        except NotFoundError:
+            pass
 
-            # TODO: The product has NO returns associated with it.
+        try:
+            # The product has NO returns associated with it.
+            existing_return = (
+                await returned_products_controller.get_returned_products_by_id(
+                    product_id
+                )
+            )
 
-        except (
-            NotFoundError
-        ):  # no sales found with product_id associated with, catched "raise NotFound"
+            if existing_return:
+                raise InvalidStateError(
+                    f"There is an existing RETURN for 'product_id' '{product_id}'"
+                )
+
+        except NotFoundError:
+            # no sales, orders, returns found, updating the product
             await self.repo.update_product(
                 product_id=product_id, product_update_dto=product_dto
             )
-            print(f"Updated, no sales associated with {product_id}")
 
         return BooleanResponseDTO(success=True)

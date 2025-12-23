@@ -3,8 +3,10 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 
 from app.config.config import ROUTES
-from app.controllers_instances import (  # orders_controller,; returns_controller,
+from app.controllers_instances import (
+    orders_controller,
     products_controller,
+    returns_controller,
     sold_products_controller,
 )
 from app.middleware.auth_middleware import authenticate_user
@@ -136,10 +138,11 @@ async def update_product(product_id: int, product: ProductUpdateDTO):
     - Status code: 200 OK
     """
     return await controller.update_product(
-        product_id,
-        product,
+        product_id=product_id,
+        product_dto=product,
         sold_products_controller=sold_products_controller,
-        # orders_controller=orders_controller,
+        orders_controller=orders_controller,
+        returned_products_controller=returns_controller.returnedProductController,
     )
 
 
