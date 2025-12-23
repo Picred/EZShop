@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from app.config.config import ROUTES
 from app.controllers_instances import (
@@ -144,6 +144,33 @@ async def update_product(product_id: int, product: ProductUpdateDTO):
         orders_controller=orders_controller,
         returned_products_controller=returns_controller.returnedProductController,
     )
+
+
+@router.delete(
+    "/{product_id}",
+    # response_model=BooleanResponseDTO,
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
+async def delete_product(product_id: int) -> None:
+    """
+    Delete an existing product.
+    - Permissions: Administrator, ShopManager
+    - Path parameter: id (int)
+    - Returns: None
+    - Status code: 204 No Content
+    """
+    await controller.delete_product(
+        product_id=product_id,
+        sold_products_controller=sold_products_controller,
+        orders_controller=orders_controller,
+        returned_products_controller=returns_controller.returnedProductController,
+    )
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 
 @router.patch(

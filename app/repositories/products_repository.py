@@ -209,3 +209,21 @@ class ProductsRepository:
             await session.commit()
             await session.refresh(db_product)
             return db_product
+
+    async def delete_product(self, product_id: int) -> bool:
+        """
+        Delete product by id.
+        - Parameter: product_id (int)
+        - Returns: bool
+        - Throws:
+            - NotFoundError if product_id not found
+        """
+        async with await self._get_session() as session:
+            product_db = await session.get(ProductDAO, product_id)
+
+            if not product_db:
+                raise NotFoundError(f"Product with id '{product_id}' not found")
+
+            await session.delete(product_db)
+            await session.commit()
+            return True

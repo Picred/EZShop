@@ -169,8 +169,7 @@ class ProductsController:
                 )
         except NotFoundError:
             pass
-        
-        
+
         try:
             # The product has NO orders associated with it.
             product_db = await self.get_product(product_id)
@@ -206,3 +205,61 @@ class ProductsController:
             )
 
         return BooleanResponseDTO(success=True)
+
+    async def delete_product(
+        self,
+        product_id: int,
+        sold_products_controller,
+        orders_controller,
+        returned_products_controller,
+    ) -> None:
+        """
+        Delete existing product.
+        - Throws:
+            - BadRequestError: if product_id < 0.
+            - InvalidStateError: if there are sales, orders, returns associated with the product to delete.
+        """
+
+        validate_field_is_positive(product_id, "product_id")
+
+        try:
+            # The product has NO sales associated with it.
+            result = await sold_products_controller.get_sold_product_by_id(product_id)
+
+            if result:
+                raise InvalidStateError(
+                    f"There is an existing SALE for 'product_id' '{product_id}'"
+                )
+        except NotFoundError:
+            pass
+
+        try:
+            # The product has NO orders associated with it.
+            product_db = await self.get_product(product_id)
+            product_barcode_on_db = product_db.barcode
+
+            existing_order = await orders_controller.get_order_by_product_barcode(
+                product_barcode_on_db
+            )
+            if existing_order:
+                raise InvalidStateError(
+                    f"There is an existing ORDER for 'product_id' '{product_id}'"
+                )
+        except NotFoundError:
+            pass
+
+        try:
+            # The product has NO returns associated with it.
+            existing_return = (
+                await returned_products_controller.get_returned_products_by_id(
+                    product_id
+                )
+            )
+
+            if existing_return:
+                raise InvalidStateError(
+                    f"There is an existing RETURN for 'product_id' '{product_id}'"
+                )
+
+        except NotFoundError:  # no sales, orders, returns found, updating the product
+            await self.repo.delete_product(product_id=product_id)
