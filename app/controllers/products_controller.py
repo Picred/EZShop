@@ -1,7 +1,11 @@
 from typing import List
 
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
-from app.models.DTO.product_dto import ProductTypeDTO, ProductUpdateDTO
+from app.models.DTO.product_dto import (
+    ProductCreateDTO,
+    ProductTypeDTO,
+    ProductUpdateDTO,
+)
 from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.products_repository import ProductsRepository
@@ -18,21 +22,26 @@ class ProductsController:
     def __init__(self):
         self.repo = ProductsRepository()
 
-    async def create_product(self, product_dto: ProductTypeDTO) -> ProductTypeDTO:
+    async def create_product(self, product_dto: ProductCreateDTO) -> ProductTypeDTO:
         """
         Create a product.
 
-        - Parameters: product_dto (ProductTypeDTO)
-        - Returns: The created product as ProductTypeDTO
+        - Parameters: product_dto (ProductCreateDTO)
+        - Returns: The created product as ProductCreateDTO
         - Throws:
             - BadRequestError if description/price_per_unit is not present, if barcode is invalid (GTIN) or not a string of 12-14 digits
         """
 
         validate_field_is_present(product_dto.description, "description")
         validate_field_is_present(product_dto.price_per_unit, "price_per_unit")
+        validate_field_is_present(product_dto.barcode, "barcode")
         validate_product_barcode(product_dto.barcode)
-        validate_product_position(product_dto.position)
-        validate_field_is_positive(product_dto.price_per_unit, "price_per_unit")
+
+        if product_dto.position is not None:
+            validate_product_position(product_dto.position)
+
+        if product_dto.quantity is not None and product_dto.quantity != 0:
+            validate_field_is_positive(product_dto.quantity, "quantity")
 
         created_product = await self.repo.create_product(
             product_dto.description,
@@ -158,6 +167,9 @@ class ProductsController:
 
         if product_dto.quantity is not None:
             validate_field_is_positive(product_dto.quantity, "quantity")
+
+        if product_dto.position is not None:
+            validate_product_position(product_dto.position)
 
         try:
             # The product has NO sales associated with it.

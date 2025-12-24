@@ -54,16 +54,17 @@ class ProductsRepository:
                 f"Product with barcode '{barcode}' already exists",
             )
 
-            result = await session.execute(
-                select(ProductDAO).filter(ProductDAO.position == position)
-            )
-            existing_products = result.scalars().all()
+            if position != "":
+                result = await session.execute(
+                    select(ProductDAO).filter(ProductDAO.position == position)
+                )
+                existing_products = result.scalars().all()
 
-            throw_conflict_if_found(
-                existing_products,
-                lambda _: True,
-                f"Product in position'{position}' already exists. Change it!",
-            )
+                throw_conflict_if_found(
+                    existing_products,
+                    lambda _: True,
+                    f"Product in position'{position}' already exists. Change it!",
+                )
 
             product = ProductDAO(
                 description=description,
@@ -131,14 +132,15 @@ class ProductsRepository:
             if not product_db:
                 raise NotFoundError(f"Product with id '{product_id}' not found")
 
-            result_conflict = await session.execute(
-                select(ProductDAO).filter(ProductDAO.position == position)
-            )
-            result_conflict = result_conflict.scalars().all()
-            if result_conflict:
-                raise ConflictError(
-                    f"Product in position'{position}' already exists. Change it!"
+            if position != "":
+                result_conflict = await session.execute(
+                    select(ProductDAO).filter(ProductDAO.position == position)
                 )
+                result_conflict = result_conflict.scalars().all()
+                if result_conflict:
+                    raise ConflictError(
+                        f"Product in position'{position}' already exists. Change it!"
+                    )
 
             product_db.position = position
             await session.commit()
