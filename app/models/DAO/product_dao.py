@@ -11,5 +11,5 @@ class ProductDAO(Base):
     barcode = Column(String, nullable=False, unique=True)
     price_per_unit = Column(Float, nullable=False)
     note = Column(String, nullable=True)
-    quantity = Column(Integer, nullable=False)
+    quantity = Column(Integer, nullable=True)
     position = Column(String, nullable=True)

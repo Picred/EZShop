@@ -1,13 +1,21 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from app.config.config import ROUTES
-from app.controllers import sales_controller
-from app.controllers_instances import products_controller
+from app.controllers_instances import (
+    orders_controller,
+    products_controller,
+    returns_controller,
+    sold_products_controller,
+)
 from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
-from app.models.DTO.product_dto import ProductTypeDTO
+from app.models.DTO.product_dto import (
+    ProductCreateDTO,
+    ProductTypeDTO,
+    ProductUpdateDTO,
+)
 from app.models.user_type import UserType
 
 router = APIRouter(prefix=ROUTES["V1_PRODUCTS"], tags=["Products"])
@@ -22,13 +30,13 @@ controller = products_controller
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
     ],
 )
-async def create_product(product: ProductTypeDTO):
+async def create_product(product: ProductCreateDTO):
     """
     Create a new product.
 
     - Permissions: Administrator, ShopManager
-    - Request body: ProductTypeDTO
-    - Returns: Created product type as ProductTypeDTO
+    - Request body: ProductCreateDTO
+    - Returns: Created product type as ProductCreateDTO
     - Status code: 201 Product created successfully
     """
     return await controller.create_product(product)
@@ -85,7 +93,7 @@ async def get_product_by_description(query: str):
         )
     ],
 )
-async def get_product(product_id: int | str):
+async def get_product(product_id: int):
     """
     Retrieve a single product by ID.
 
@@ -124,7 +132,7 @@ async def get_product_by_barcode(barcode: str):
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
     ],
 )
-async def update_product(product_id: int, product: ProductTypeDTO):
+async def update_product(product_id: int, product: ProductUpdateDTO):
     """
     Update an existing product.
     - Permissions: Administrator, ShopManager
@@ -134,8 +142,38 @@ async def update_product(product_id: int, product: ProductTypeDTO):
     - Status code: 200 OK
     """
     return await controller.update_product(
-        product_id, product, sales_controller=sales_controller
+        product_id=product_id,
+        product_dto=product,
+        sold_products_controller=sold_products_controller,
+        orders_controller=orders_controller,
+        returned_products_controller=returns_controller.returnedProductController,
     )
+
+
+@router.delete(
+    "/{product_id}",
+    # response_model=BooleanResponseDTO,
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
+    ],
+)
+async def delete_product(product_id: int) -> None:
+    """
+    Delete an existing product.
+    - Permissions: Administrator, ShopManager
+    - Path parameter: id (int)
+    - Returns: None
+    - Status code: 204 No Content
+    """
+    await controller.delete_product(
+        product_id=product_id,
+        sold_products_controller=sold_products_controller,
+        orders_controller=orders_controller,
+        returned_products_controller=returns_controller.returnedProductController,
+    )
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch(
@@ -146,9 +184,7 @@ async def update_product(product_id: int, product: ProductTypeDTO):
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
     ],
 )
-async def update_product_position(
-    product_id: int | str, position: str
-) -> BooleanResponseDTO:
+async def update_product_position(product_id: int, position: str) -> BooleanResponseDTO:
     """
     Update an existing position of a product.
     - Permissions: Administrator, ShopManager
@@ -168,9 +204,7 @@ async def update_product_position(
         Depends(authenticate_user([UserType.Administrator, UserType.ShopManager]))
     ],
 )
-async def update_product_quantity(
-    product_id: int | str, quantity: int | str
-) -> BooleanResponseDTO:
+async def update_product_quantity(product_id: int, quantity: int) -> BooleanResponseDTO:
     """
     Update an existing quantity of a product.
     - Permissions: Administrator, ShopManager

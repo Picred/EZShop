@@ -1,8 +1,10 @@
+from typing import List
+
+from app.models.DAO.returned_product_dao import ReturnedProductDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
+from app.models.DTO.returned_product_dto import ReturnedProductDTO
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.returned_products_repository import ReturnedProductsRepository
-from app.models.DTO.returned_product_dto import ReturnedProductDTO
-from app.models.DAO.returned_product_dao import ReturnedProductDAO
 from app.services.input_validator_service import (
     validate_discount_rate,
     validate_field_is_positive,
@@ -10,8 +12,6 @@ from app.services.input_validator_service import (
     validate_product_barcode,
 )
 from app.services.mapper_service import returned_product_dao_to_dto
-from typing import List
-
 
 
 class ReturnedProductController:
@@ -73,7 +73,7 @@ class ReturnedProductController:
 
         return returned_product_dao_to_dto(edited_product_dao)
     
-    async def get_returned_products_by_id(self, product_id: int) -> List[ReturnedProductDTO]:
+    async def get_returned_products_by_id(self, product_id: int) -> ReturnedProductDTO:
         """
         Get returned product by id.
         - Parameters: product_id (int)
@@ -87,9 +87,9 @@ class ReturnedProductController:
         returned_product_dao = await self.repo.get_returned_products_by_id(product_id)
 
         if not returned_product_dao:
-            raise NotFoundError("Product not found")
+            raise NotFoundError("Product not found in returns.")
 
-        return [returned_product_dao_to_dto(rpd) for rpd in returned_product_dao]
+        return returned_product_dao_to_dto(returned_product_dao)
 
     async def get_returned_product_by_barcode(self, product_barcode: str) -> List[ReturnedProductDTO]:
         """

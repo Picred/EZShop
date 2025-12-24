@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 
 from app.config.config import ROUTES
-from app.controllers_instances import orders_controller
+from app.controllers_instances import orders_controller, products_controller
 from app.middleware.auth_middleware import authenticate_user
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.order_dto import OrderDTO
@@ -26,7 +26,7 @@ async def issue_order(order: OrderDTO):
     Issue a new order.
     - Permissions: Administrator, ShopManager
     """
-    return await controller.create_order(order)
+    return await controller.create_order(order, products_controller.repo)
 
 
 @router.post(
