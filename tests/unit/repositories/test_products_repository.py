@@ -276,7 +276,7 @@ class TestProductsRepository:
     @pytest.mark.asyncio
     async def test_update_product_duplicate_barcode(self, repo):
         old_product: ProductDAO = self.created_products[0]
-        duplicated_barcode: str = self.created_products[1].barcode
+        duplicated_barcode: str = self.created_products[1].barcode  # type: ignore
         new_product: ProductUpdateDTO = ProductUpdateDTO(
             description="banana",
             barcode=duplicated_barcode,
@@ -288,3 +288,21 @@ class TestProductsRepository:
 
         with pytest.raises(ConflictError):
             await repo.update_product(new_product, old_product.id)
+
+    @pytest.mark.asyncio
+    async def test_delete_product(self, repo):
+        created_product: ProductDAO = await repo.create_product(
+            "diaper", "0123456789050", 5, "", 150, "C-1-1"
+        )
+
+        status: bool = await repo.delete_product(created_product.id)
+
+        assert status == True
+        with pytest.raises(NotFoundError):
+            await repo.get_product(created_product.id)
+
+    @pytest.mark.asyncio
+    async def test_delete_product_nonexistent_id(self, repo):
+        nonexistent_id: int = 12345
+        with pytest.raises(NotFoundError):
+            await repo.delete_product(nonexistent_id)
