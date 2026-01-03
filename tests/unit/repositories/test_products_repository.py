@@ -3,6 +3,7 @@ import asyncio
 import pytest
 
 from app.models.errors.conflict_error import ConflictError
+from app.models.errors.notfound_error import NotFoundError
 from app.repositories.products_repository import ProductDAO, ProductsRepository
 from init_db import init_db, reset
 
@@ -121,7 +122,7 @@ class TestProductsRepository:
             position="A-1-1",
             note="",
         )
-        with pytest.raises(ConflictError) as result:
+        with pytest.raises(ConflictError):
             await repo.create_product(
                 product_barcode_duplicate.description,
                 product_barcode_duplicate.barcode,
@@ -131,7 +132,7 @@ class TestProductsRepository:
                 product_barcode_duplicate.position,
             )
 
-        with pytest.raises(ConflictError) as result:
+        with pytest.raises(ConflictError):
             await repo.create_product(
                 product_position_duplicate.description,
                 product_position_duplicate.barcode,
@@ -174,3 +175,34 @@ class TestProductsRepository:
         assert db_product.price_per_unit == expected_product.price_per_unit  # type: ignore
         assert db_product.quantity == expected_product.quantity  # type: ignore
         assert db_product.description == expected_product.description  # type: ignore
+
+    @pytest.mark.asyncio
+    async def test_update_product_position(self, repo):
+        new_position: str = "B-1-1"
+        product: ProductDAO = self.created_products[0]
+        updated_product: ProductDAO
+
+        await repo.update_product_position(product.id, new_position)
+        updated_product = await repo.get_product(product.id)
+
+        assert updated_product.position == new_position  # type: ignore
+
+    @pytest.mark.asyncio
+    async def test_update_product_position_nonexistent_product(self, repo):
+        new_position: str = "B-1-1"
+        nonexistent_id: int = 12345
+
+        with pytest.raises(NotFoundError):
+            await repo.update_product_position(nonexistent_id, new_position)
+
+    @pytest.mark.asyncio
+    async def test_update_product_position_conflict(self, repo):
+        conflicting_position: str = self.created_products[2].position  # type: ignore
+        product: ProductDAO = self.created_products[1]
+
+        with pytest.raises(ConflictError):
+            await repo.update_product_position(product.id, conflicting_position)
+
+        not_updated_product = await repo.get_product(product.id)
+
+        assert not_updated_product.position == product.position
