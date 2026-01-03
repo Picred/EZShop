@@ -44,9 +44,11 @@
 
 
 ## Integration Testing
-| Test case name               | Object(s) tested                      | Test level | Technique used                                          |
-|:-----------------------------|:--------------------------------------|:----------:|:--------------------------------------------------------|
-|                              |                                       |            |                                                         |
+| Test case name               | Object(s) tested                      |   Test level   |         Technique used                                  |
+|:-----------------------------|:--------------------------------------|:--------------:|:--------------------------------------------------------|
+| test_get_balance             | AccountingController.get_balance      |   Integration  | BB / Equivalence Partitioning                           |
+| test_set_balance             | AccountingController.set_balance      |   Integration  | WB / Decision Coverage                                  |
+| test_reset_balance           | AccountingController.reset_balance  |   Integration    | BB / Equivalence Partitioning                           |
 
 
 
