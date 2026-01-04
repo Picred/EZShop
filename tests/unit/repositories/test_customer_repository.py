@@ -20,6 +20,12 @@ def mock_session():
     """Mock AsyncSession for testing."""
     session = AsyncMock()
     session.__aenter__.return_value = session
+    # session.add is a synchronous call in SQLAlchemy; make it a non-async mock
+    session.add = MagicMock()
+    # session.delete, commit and refresh are awaited in the repository, keep them async
+    session.delete = AsyncMock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
     return session
 
 
