@@ -47,20 +47,24 @@
 |         Test case name            | Object(s) tested                                |   Test level   |         Technique used                                  |
 |:--------------------------------: |:----------------------------------------------: |:--------------:|:--------------------------------------------------------|
 | test_get_balance                  | AccountingController.get_balance                |   Integration  | BB / Equivalence Partitioning                           |
-| test_set_balance                  | AccountingController.set_balance                |   Integration  | WB / Decision Coverage                                  |
+| test_set_balance                  | AccountingController.set_balance                |   Integration  | BB **TODO**                                  |
 | test_reset_balance                | AccountingController.reset_balance              |   Integration  | BB / Equivalence Partitioning                           |
 | test_create_order                 | OrdersController.create_order                   |   Integration  | BB / Equivalence Partitioning / Boundary                |
-| test_list_orders                  | OrdersController.list_orders                    |   Integration  | WB / Statement coverage                                 |
-| test_pay_order                    | OrdersController.pay_order                      |   Integration  | WB / Decision Coverage                                  |
-| test_record_arrial                | OrdersController.record_arrial                  |   Integration  | WB / Decision Coverage                                  |
+| test_list_orders                  | OrdersController.list_orders                    |   Integration  | BB **TODO**                                 |
+| test_pay_order                    | OrdersController.pay_order                      |   Integration  | BB **TODO**                                  |
+| test_record_arrial                | OrdersController.record_arrial                  |   Integration  | BB **TODO**                                  |
 | test_get_order_by_product_barcode | OrdersController.get_order_by_product_barcode   |   Integration  | BB / Equivalence Partitioning                           |
 
 
 
 ## End to end Testing
-| Test case name               | Object(s) tested                      | Test level | Technique used                                          |
-|:-----------------------------|:--------------------------------------|:----------:|:--------------------------------------------------------|
-|                              |                                       |            |                                                         |
+| Test case name                   | Object(s) tested                      | Test level | Technique used                                          |
+|:---------------------------------|:--------------------------------------|:----------:|:--------------------------------------------------------|
+| test_get_current_balance         | AccountingRoute.get_current_balance   | End to End | BB / Equivalence Partitioning                           |
+| test_set_balance_authentication  | AccountingRoute.set_balance (auth)    | End to End | BB / Equivalence Partitioning                           |
+| test_set_balance_authenticated   | AccountingRoute.set_balance           | End to End | BB / Boundary                                           |
+| test_reset_balance_authentication| AccountingRoute.reset_balance (auth)  | End to End | BB / Equivalence Partitioning                           |
+| test_reset_balance_authenticated | AccountingRoute.reset_balance         | End to End | BB / State-based                                        |
 
 # Coverage
 
