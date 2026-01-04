@@ -44,11 +44,16 @@
 
 
 ## Integration Testing
-| Test case name               | Object(s) tested                      |   Test level   |         Technique used                                  |
-|:-----------------------------|:--------------------------------------|:--------------:|:--------------------------------------------------------|
-| test_get_balance             | AccountingController.get_balance      |   Integration  | BB / Equivalence Partitioning                           |
-| test_set_balance             | AccountingController.set_balance      |   Integration  | WB / Decision Coverage                                  |
-| test_reset_balance           | AccountingController.reset_balance  |   Integration    | BB / Equivalence Partitioning                           |
+|         Test case name            | Object(s) tested                                |   Test level   |         Technique used                                  |
+|:--------------------------------: |:----------------------------------------------: |:--------------:|:--------------------------------------------------------|
+| test_get_balance                  | AccountingController.get_balance                |   Integration  | BB / Equivalence Partitioning                           |
+| test_set_balance                  | AccountingController.set_balance                |   Integration  | WB / Decision Coverage                                  |
+| test_reset_balance                | AccountingController.reset_balance              |   Integration  | BB / Equivalence Partitioning                           |
+| test_create_order                 | OrdersController.create_order                   |   Integration  | BB / Equivalence Partitioning / Boundary                |
+| test_list_orders                  | OrdersController.list_orders                    |   Integration  | WB / Statement coverage                                 |
+| test_pay_order                    | OrdersController.pay_order                      |   Integration  | WB / Decision Coverage                                  |
+| test_record_arrial                | OrdersController.record_arrial                  |   Integration  | WB / Decision Coverage                                  |
+| test_get_order_by_product_barcode | OrdersController.get_order_by_product_barcode   |   Integration  | BB / Equivalence Partitioning                           |
 
 
 
