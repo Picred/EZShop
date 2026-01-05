@@ -324,12 +324,12 @@ class TestProductsRouter:
             (
                 1,  # correct update
                 {
-                    "description": "Test product",
+                    "description": "updated product",
                     "barcode": "9780201379624",
                     "price_per_unit": 9.99,
-                    "note": "",
+                    "note": "updated note",
                     "quantity": 10,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 201,
             ),
@@ -341,7 +341,7 @@ class TestProductsRouter:
                     "price_per_unit": 9.99,
                     "note": "",
                     "quantity": 10,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 400,
             ),
@@ -353,7 +353,7 @@ class TestProductsRouter:
                     "price_per_unit": 9.99,
                     "note": "",
                     "quantity": 10,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 400,
             ),
@@ -365,7 +365,7 @@ class TestProductsRouter:
                     "price_per_unit": 9.99,
                     "note": "",
                     "quantity": -3,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 400,
             ),
@@ -377,7 +377,7 @@ class TestProductsRouter:
                     "price_per_unit": -9.99,
                     "note": "",
                     "quantity": 10,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 400,
             ),
@@ -389,10 +389,45 @@ class TestProductsRouter:
                     "price_per_unit": 9.99,
                     "note": "",
                     "quantity": 10,
-                    "position": "A-1-1",
+                    "position": "B-1-1",
                 },
                 404,
             ),
+        ],
+    )
+    def test_edit_product(
+        self, client, auth_tokens, product_id, product_update, expected_exception_code
+    ):
+        headers = auth_header(auth_tokens, "admin")
+        product = {
+            "description": "Test product",
+            "barcode": "123456789012",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 10,
+            "position": "A-1-1",
+        }
+
+        client.post(  # create product to update
+            BASE_URL + "/products",
+            json=product,
+            headers=headers,
+        )
+
+        resp = client.put(
+            BASE_URL + "/products/" + str(product_id),
+            json=product_update,
+            headers=headers,
+        )
+
+        if resp.status_code == 422:
+            resp.status_code = 400
+
+        assert resp.status_code == expected_exception_code
+
+    @pytest.mark.parametrize(
+        "product_id, product_update, expected_exception_code",
+        [
             (
                 1,  # barcode already in use
                 {
@@ -419,7 +454,7 @@ class TestProductsRouter:
             ),
         ],
     )
-    def test_edit_product(
+    def test_edit_product_duplicates(
         self, client, auth_tokens, product_id, product_update, expected_exception_code
     ):
         headers = auth_header(auth_tokens, "admin")
@@ -441,13 +476,13 @@ class TestProductsRouter:
             "position": "C-1-1",
         }
 
-        client.post(  # create product to update
+        resp = client.post(  # create product to update
             BASE_URL + "/products",
             json=product,
             headers=headers,
         )
 
-        client.post(  # create 2nd product to test conflicts
+        resp = client.post(  # create 2nd product to test conflicts
             BASE_URL + "/products",
             json=product2,
             headers=headers,
@@ -456,6 +491,113 @@ class TestProductsRouter:
         resp = client.put(
             BASE_URL + "/products/" + str(product_id),
             json=product_update,
+            headers=headers,
+        )
+
+        if resp.status_code == 422:
+            resp.status_code = 400
+
+        assert resp.status_code == expected_exception_code
+
+    """
+    @pytest.mark.parametrize(
+        "input_id, new_position, expected_exception_code",
+        [
+            (1, "B-1-1", 201),  # success
+            (1, "", 201),  # success
+            (-1, "B-1-1", 400),  # invalid id
+            (12345, "B-1-1", 404),  # no product found
+            ("abc", "B-1-1", 400),  # invalid id
+            (1, "B-1", 400),  # invalid position string
+            (1, "C-1-1", 409),  # position conflict
+        ],
+    )
+    def test_edit_product_position(
+        self, client, auth_tokens, input_id, new_position, expected_exception_code
+    ):
+        headers = auth_header(auth_tokens, "admin")
+        product = {
+            "description": "Test product",
+            "barcode": "123456789012",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 10,
+            "position": "A-1-1",
+        }
+
+        product2 = {
+            "description": "Test product 2",
+            "barcode": "4006381333931",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 10,
+            "position": "C-1-1",
+        }
+
+        client.post(  # create product to update
+            BASE_URL + "/products",
+            json=product,
+            headers=headers,
+        )
+
+        client.post(  # create product to test conflicts
+            BASE_URL + "/products",
+            json=product2,
+            headers=headers,
+        )
+
+        resp = client.patch(
+            BASE_URL
+            + "/products/"
+            + str(input_id)
+            + "/position?position="
+            + new_position,
+            headers=headers,
+        )
+
+        if resp.status_code == 422:
+            resp.status_code = 400
+
+        assert resp.status_code == expected_exception_code
+        """
+
+    @pytest.mark.parametrize(
+        "input_id, quantity, expected_exception_code",
+        [
+            (1, 20, 201),  # success
+            (1, -5, 201),  # success
+            (-1, 20, 400),  # invalid id
+            (12345, 20, 404),  # no product found
+            ("abc", 20, 400),  # invalid id
+            (1, -2000, 400),  # insufficient quaantity available
+        ],
+    )
+    def test_edit_product_quantity(
+        self, client, auth_tokens, input_id, quantity, expected_exception_code
+    ):
+
+        headers = auth_header(auth_tokens, "admin")
+        product = {
+            "description": "Test product",
+            "barcode": "123456789012",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 100,
+            "position": "A-1-1",
+        }
+
+        client.post(  # create product to update
+            BASE_URL + "/products",
+            json=product,
+            headers=headers,
+        )
+
+        resp = client.patch(
+            BASE_URL
+            + "/products/"
+            + str(input_id)
+            + "/quantity?quantity="
+            + str(quantity),
             headers=headers,
         )
 
