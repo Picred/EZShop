@@ -499,11 +499,10 @@ class TestProductsRouter:
 
         assert resp.status_code == expected_exception_code
 
-    """
     @pytest.mark.parametrize(
         "input_id, new_position, expected_exception_code",
         [
-            (1, "B-1-1", 201),  # success
+            (1, "Z-1-1", 201),  # success
             (1, "", 201),  # success
             (-1, "B-1-1", 400),  # invalid id
             (12345, "B-1-1", 404),  # no product found
@@ -559,7 +558,6 @@ class TestProductsRouter:
             resp.status_code = 400
 
         assert resp.status_code == expected_exception_code
-        """
 
     @pytest.mark.parametrize(
         "input_id, quantity, expected_exception_code",
