@@ -167,7 +167,7 @@ class TestOrdersRouter:
     def test_issue_order(
         self, client, auth_tokens, product_of_the_order, expected_status_code
     ):
-        headers = auth_header(auth_tokens, "admin")
+        headers = auth_header(auth_tokens, "shop_manager")
         # product creation
         client.post(
             f"{BASE_URL}/products",
@@ -450,9 +450,11 @@ class TestOrdersRouter:
             "price_per_unit": 2.5,
         }
         admin_header = auth_header(auth_tokens, "admin")
+        shop_manager_header = auth_header(auth_tokens, "shop_manager")
+
         # product creation
         client.post(
-            f"{BASE_URL}/products", json=TEST_PRODUCT_ON_DB, headers=admin_header
+            f"{BASE_URL}/products", json=TEST_PRODUCT_ON_DB, headers=shop_manager_header
         )
 
         # balance set
@@ -466,18 +468,18 @@ class TestOrdersRouter:
             client.post(
                 f"{BASE_URL}/orders/payfor",
                 json=test_product,
-                headers=admin_header,
+                headers=shop_manager_header,
             )
         else:
             client.post(
                 f"{BASE_URL}/orders",
                 json=test_product,
-                headers=admin_header,
+                headers=shop_manager_header,
             )
 
         result = client.patch(
             f"{BASE_URL}/orders/{order_id}/pay",
-            headers=admin_header,
+            headers=shop_manager_header,
         )
 
         if expected_status_code == 201:
@@ -485,7 +487,9 @@ class TestOrdersRouter:
             balance_result = client.get(f"{BASE_URL}/balance", headers=admin_header)
             new_balance = balance_result.json()["balance"]
 
-            all_orders_result = client.get(f"{BASE_URL}/orders", headers=admin_header)
+            all_orders_result = client.get(
+                f"{BASE_URL}/orders", headers=shop_manager_header
+            )
             first_order = all_orders_result.json()[0]
             assert first_order["status"] == "PAID"
             assert result_json["success"] == True
@@ -563,9 +567,10 @@ class TestOrdersRouter:
             "price_per_unit": 2.5,
         }
         admin_header = auth_header(auth_tokens, "admin")
+        shop_manager_header = auth_header(auth_tokens, "shop_manager")
         # product creation
         client.post(
-            f"{BASE_URL}/products", json=TEST_PRODUCT_ON_DB, headers=admin_header
+            f"{BASE_URL}/products", json=TEST_PRODUCT_ON_DB, headers=shop_manager_header
         )
 
         # balance set
@@ -579,13 +584,13 @@ class TestOrdersRouter:
             client.post(
                 f"{BASE_URL}/orders/",
                 json=test_product,
-                headers=admin_header,
+                headers=shop_manager_header,
             )
         else:
             client.post(
                 f"{BASE_URL}/orders/payfor",
                 json=test_product,
-                headers=admin_header,
+                headers=shop_manager_header,
             )
 
         result = client.patch(
@@ -597,9 +602,11 @@ class TestOrdersRouter:
 
         if expected_status_code == 201:
             result_json = result.json()
-            all_orders_result = client.get(f"{BASE_URL}/orders", headers=admin_header)
+            all_orders_result = client.get(
+                f"{BASE_URL}/orders", headers=shop_manager_header
+            )
             first_order = all_orders_result.json()[0]
-            product_on_db_result = client.get(f"{BASE_URL}/products", headers=admin_header) # fmt: skip
+            product_on_db_result = client.get(f"{BASE_URL}/products", headers=shop_manager_header) # fmt: skip
             product_on_db = product_on_db_result.json()[0]
 
             assert product_on_db["quantity"] == TEST_PRODUCT_ON_DB["quantity"] + test_product["quantity"] # fmt: skip

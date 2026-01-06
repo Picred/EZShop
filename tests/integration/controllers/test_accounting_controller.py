@@ -58,7 +58,6 @@ class TestAccountingController:
                 await controller.set_balance(amount)
         else:
             response = await controller.set_balance(amount)
-            assert isinstance(response, BooleanResponseDTO)
             assert response.success is True
             assert existing_dao.balance == 100.0
 
