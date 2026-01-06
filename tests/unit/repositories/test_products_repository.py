@@ -1,4 +1,4 @@
-import asyncio
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -7,66 +7,111 @@ from app.models.errors.bad_request import BadRequestError
 from app.models.errors.conflict_error import ConflictError
 from app.models.errors.notfound_error import NotFoundError
 from app.repositories.products_repository import ProductDAO, ProductsRepository
-from init_db import init_db, reset
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture
+def mock_session():
+    """Mock AsyncSession for testing."""
+    session = AsyncMock()
+    session.__aenter__.return_value = session
+    # session.add is a synchronous call in SQLAlchemy; make it a non-async mock
+    session.add = MagicMock()
+    # session.delete, commit and refresh are awaited in the repository, keep them async
+    session.delete = AsyncMock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+    return session
 
 
-@pytest.fixture(scope="session", autouse=True)
-def reset_db(event_loop):
-    event_loop.run_until_complete(reset())
-    event_loop.run_until_complete(init_db())
+@pytest.fixture
+def repo(mock_session):
+    """Injected Customer repository with mocked session."""
+    return ProductsRepository(session=mock_session)
 
 
 # Tests
 class TestProductsRepository:
-    expected_products: list[ProductDAO] = []
-    created_products: list[ProductDAO] = []
+    @pytest.mark.parametrize(
+        "product, outcome",
+        [
+            (
+                ProductDAO(
+                    description="coffee",
+                    barcode="4006381333931",
+                    price_per_unit=1.5,
+                    note="",
+                    quantity=50,
+                    position="A-1-1",
+                ),
+                "success",
+            ),
+            (
+                ProductDAO(  # barcode conflict
+                    description="coffee",
+                    barcode="9780201379624",
+                    price_per_unit=1.5,
+                    note="",
+                    quantity=50,
+                    position="A-1-1",
+                ),
+                "conflict",
+            ),
+            (
+                ProductDAO(  # position conflict
+                    description="coffee",
+                    barcode="4006381333931",
+                    price_per_unit=1.5,
+                    note="",
+                    quantity=50,
+                    position="B-1-1",
+                ),
+                "conflict",
+            ),
+        ],
+    )
+    async def test_create_product(self, repo, mock_session, product, outcome):
+        mock_result = MagicMock()
+        mock_session.execute = AsyncMock(return_value=mock_result)
 
-    @pytest.fixture(scope="session")
-    def repo(self):
-        return ProductsRepository()
-
-    @pytest.fixture(scope="session", autouse=True)
-    async def populate_product_repository(self, repo):
-        self.expected_products.append(
-            ProductDAO(
-                description="coffe",
-                barcode="4006381333931",
-                price_per_unit=1.5,
-                quantity=150,
-                position="A-1-1",
-                note="",
-            )
-        )
-        self.expected_products.append(
-            ProductDAO(
-                description="milk",
-                barcode="9780201379624",
-                price_per_unit=1,
-                quantity=100,
-                position="A-1-2",
-                note="",
-            )
-        )
-        self.expected_products.append(
-            ProductDAO(
-                description="beer",
-                barcode="5901234123457",
-                price_per_unit=2,
-                quantity=80,
-                position="A-1-3",
-                note="",
-            )
+        # create another product to test conflicts
+        existing_product = ProductDAO(
+            description="milk",
+            barcode="9780201379624",
+            price_per_unit=1.5,
+            note="",
+            quantity=10,
+            position="B-1-1",
         )
 
-        for product in self.expected_products:
-            self.created_products.append(
+        if outcome == "success":
+            mock_result.scalars.return_value.all.return_value = []
+        elif outcome == "conflict":
+            mock_result.scalars.return_value.all.return_value = [existing_product]
+
+        if outcome == "success":
+            result = await repo.create_product(
+                product.description,
+                product.barcode,
+                product.price_per_unit,
+                product.note,
+                product.quantity,
+                product.position,
+            )
+
+            assert isinstance(result, ProductDAO)
+            assert result.description == product.description
+            assert result.barcode == product.barcode
+            assert result.price_per_unit == product.price_per_unit
+            assert result.note == product.note
+            assert result.quantity == product.quantity
+            assert result.position == product.position
+
+            mock_session.add.assert_called_once()
+            mock_session.commit.assert_called_once()
+            mock_session.refresh.assert_called_once()
+
+        elif outcome == "conflict":
+            with pytest.raises(ConflictError):
                 await repo.create_product(
                     product.description,
                     product.barcode,
@@ -75,234 +120,222 @@ class TestProductsRepository:
                     product.quantity,
                     product.position,
                 )
-            )
-        return
+
+            mock_session.add.assert_not_called()
+            mock_session.commit.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_list_products(self, repo):
-        product_count: int = len(await repo.list_products())
-        assert product_count == len(self.expected_products)
+    async def test_list_products(self, repo, mock_session):
+        mock_result = MagicMock()
+        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_result.scalars.return_value.all.return_value = []
 
-    @pytest.mark.asyncio
-    async def test_create_new_product(self, repo):
-        product: ProductDAO = ProductDAO(
-            description="apple",
-            barcode="7501031311309",
-            price_per_unit=1,
-            quantity=135,
-            position="A-1-4",
-            note="",
-        )
-        created_product: ProductDAO = await repo.create_product(
-            product.description,
-            product.barcode,
-            product.price_per_unit,
-            product.note,
-            product.quantity,
-            product.position,
-        )
-        assert created_product.barcode == product.barcode  # type: ignore
-        assert created_product.price_per_unit == product.price_per_unit  # type: ignore
-        assert created_product.quantity == product.quantity  # type: ignore
-        assert created_product.description == product.description  # type: ignore
-
-    @pytest.mark.asyncio
-    async def test_create_duplicate_products(self, repo):
-        product_barcode_duplicate: ProductDAO = ProductDAO(
-            description="coffe",
-            barcode="4006381333931",
+        product = ProductDAO(
+            description="milk",
+            barcode="9780201379624",
             price_per_unit=1.5,
-            quantity=150,
-            position="A-1-0",
             note="",
-        )
-        product_position_duplicate: ProductDAO = ProductDAO(
-            description="beer",
-            barcode="8806085724013",
-            price_per_unit=1,
-            quantity=135,
-            position="A-1-1",
-            note="",
-        )
-        with pytest.raises(ConflictError):
-            await repo.create_product(
-                product_barcode_duplicate.description,
-                product_barcode_duplicate.barcode,
-                product_barcode_duplicate.price_per_unit,
-                product_barcode_duplicate.note,
-                product_barcode_duplicate.quantity,
-                product_barcode_duplicate.position,
-            )
-
-        with pytest.raises(ConflictError):
-            await repo.create_product(
-                product_position_duplicate.description,
-                product_position_duplicate.barcode,
-                product_position_duplicate.price_per_unit,
-                product_position_duplicate.note,
-                product_position_duplicate.quantity,
-                product_position_duplicate.position,
-            )
-
-    @pytest.mark.asyncio
-    async def test_get_product_by_id(self, repo):
-        expected_product: ProductDAO = self.created_products[0]
-        db_product: ProductDAO = await repo.get_product(expected_product.id)
-
-        assert db_product.barcode == expected_product.barcode  # type: ignore
-        assert db_product.price_per_unit == expected_product.price_per_unit  # type: ignore
-        assert db_product.quantity == expected_product.quantity  # type: ignore
-        assert db_product.description == expected_product.description  # type: ignore
-
-    @pytest.mark.asyncio
-    async def test_get_product_by_barcode(self, repo):
-        expected_product: ProductDAO = self.created_products[0]
-        db_product: ProductDAO = await repo.get_product_by_barcode(
-            expected_product.barcode
+            quantity=10,
+            position="B-1-1",
         )
 
-        assert db_product.barcode == expected_product.barcode  # type: ignore
-        assert db_product.price_per_unit == expected_product.price_per_unit  # type: ignore
-        assert db_product.quantity == expected_product.quantity  # type: ignore
-        assert db_product.description == expected_product.description  # type: ignore
+        product_count: int = len(await repo.list_products())
+        assert product_count == 0
 
-    @pytest.mark.asyncio
-    async def test_get_product_by_name(self, repo):
-        expected_product: ProductDAO = self.created_products[0]
-        db_product: ProductDAO = (
-            await repo.get_product_by_description(expected_product.description)
-        )[0]
+        mock_result.scalars.return_value.all.return_value = [product, product, product]
+        product_count: int = len(await repo.list_products())
+        assert product_count == 3
 
-        assert db_product.barcode == expected_product.barcode  # type: ignore
-        assert db_product.price_per_unit == expected_product.price_per_unit  # type: ignore
-        assert db_product.quantity == expected_product.quantity  # type: ignore
-        assert db_product.description == expected_product.description  # type: ignore
+    @pytest.mark.parametrize(
+        "returned_product, outcome",
+        [
+            (
+                ProductDAO(
+                    id=1,
+                    description="coffee",
+                    barcode="4006381333931",
+                    price_per_unit=1.5,
+                    note="",
+                    quantity=50,
+                    position="A-1-1",
+                ),
+                "success",
+            ),
+            (
+                None,
+                "not_found",
+            ),
+        ],
+    )
+    async def test_get_product(self, repo, mock_session, returned_product, outcome):
+        mock_session.get = AsyncMock(return_value=returned_product)
 
-    @pytest.mark.asyncio
-    async def test_update_product_position(self, repo):
-        new_position: str = "B-1-1"
-        product: ProductDAO = self.created_products[0]
-        updated_product: ProductDAO
+        if outcome == "success":
+            result = await repo.get_product(1)
 
-        await repo.update_product_position(product.id, new_position)
-        updated_product = await repo.get_product(product.id)
+            assert isinstance(result, ProductDAO)
+            assert result.id == 1  # type: ignore
 
-        assert updated_product.position == new_position  # type: ignore
+            mock_session.get.assert_called_once_with(ProductDAO, 1)
 
-    @pytest.mark.asyncio
-    async def test_update_product_position_nonexistent_product(self, repo):
-        new_position: str = "B-1-1"
-        nonexistent_id: int = 12345
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.get_product(1)
 
-        with pytest.raises(NotFoundError):
-            await repo.update_product_position(nonexistent_id, new_position)
+            mock_session.get.assert_called_once_with(ProductDAO, 1)
 
-    @pytest.mark.asyncio
-    async def test_update_product_position_conflict(self, repo):
-        conflicting_position: str = self.created_products[2].position  # type: ignore
-        product: ProductDAO = self.created_products[1]
+    @pytest.mark.parametrize(
+        "db_result, outcome",
+        [
+            ([ProductDAO(barcode="123")], "success"),
+            ([], "not_found"),
+        ],
+    )
+    async def test_get_product_by_barcode(self, repo, mock_session, db_result, outcome):
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = db_result
+        mock_session.execute = AsyncMock(return_value=mock_result)
 
-        with pytest.raises(ConflictError):
-            await repo.update_product_position(product.id, conflicting_position)
+        if outcome == "success":
+            product = await repo.get_product_by_barcode("123")
+            assert product.barcode == "123"
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.get_product_by_barcode("123")
 
-        not_updated_product = await repo.get_product(product.id)
+        mock_session.execute.assert_called_once()
 
-        assert not_updated_product.position == product.position
+    @pytest.mark.parametrize(
+        "db_result",
+        [
+            [],
+            [ProductDAO(description="coffee")],
+        ],
+    )
+    async def test_get_product_by_description(self, repo, mock_session, db_result):
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = db_result
+        mock_session.execute = AsyncMock(return_value=mock_result)
 
-    @pytest.mark.asyncio
-    async def test_update_product_quantity(self, repo):
-        new_quantity: int = 150
-        product: ProductDAO = self.created_products[0]
-        old_quantity: int = product.quantity  # type: ignore
-        updated_product: ProductDAO
+        result = await repo.get_product_by_description("coffee")
 
-        await repo.update_product_quantity(product.id, new_quantity)
-        updated_product = await repo.get_product(product.id)
+        assert result == db_result
+        mock_session.execute.assert_called_once()
 
-        assert updated_product.quantity == old_quantity + new_quantity  # type: ignore
+    @pytest.mark.parametrize(
+        "product_exists, conflict_exists, outcome",
+        [
+            (False, False, "not_found"),
+            (True, True, "conflict"),
+            (True, False, "success"),
+        ],
+    )
+    async def test_update_product_position(
+        self, repo, mock_session, product_exists, conflict_exists, outcome
+    ):
+        product = ProductDAO(position="A-1-1")
 
-    @pytest.mark.asyncio
-    async def test_update_product_quantity_nonexistent_product(self, repo):
-        new_quantity: int = 150
-        nonexistent_id: int = 12345
+        mock_session.get = AsyncMock(return_value=product if product_exists else None)
 
-        with pytest.raises(NotFoundError):
-            await repo.update_product_quantity(nonexistent_id, new_quantity)
-
-    @pytest.mark.asyncio
-    async def test_update_product_quantity_invalid_quantity(self, repo):
-        invalid_quantity: int = -200000
-        product: ProductDAO = self.created_products[0]
-
-        with pytest.raises(BadRequestError):
-            await repo.update_product_quantity(product.id, invalid_quantity)
-
-    @pytest.mark.asyncio
-    async def test_update_product(self, repo):
-        old_product: ProductDAO = self.created_products[0]
-        new_product: ProductUpdateDTO = ProductUpdateDTO(
-            description="banana",
-            barcode="8501234567892",
-            price_per_unit=5,
-            quantity=20,
-            position="Z-1-1",
-            note="",
+        conflict_result = MagicMock()
+        conflict_result.scalars.return_value.all.return_value = (
+            [ProductDAO()] if conflict_exists else []
         )
 
-        await repo.update_product(new_product, old_product.id)
+        mock_session.execute = AsyncMock(return_value=conflict_result)
 
-        updated_product: ProductDAO = await repo.get_product(old_product.id)
+        if outcome == "success":
+            result = await repo.update_product_position(1, "B-1-1")
+            assert result.position == "B-1-1"
+            mock_session.commit.assert_called_once()
+            mock_session.refresh.assert_called_once()
+        elif outcome == "conflict":
+            with pytest.raises(ConflictError):
+                await repo.update_product_position(1, "B-1-1")
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.update_product_position(1, "B-1-1")
 
-        assert updated_product.barcode == new_product.barcode  # type: ignore
-        assert updated_product.price_per_unit == new_product.price_per_unit  # type: ignore
-        assert updated_product.quantity == new_product.quantity  # type: ignore
-        assert updated_product.description == new_product.description  # type: ignore
+    @pytest.mark.parametrize(
+        "initial_qty, delta, outcome",
+        [
+            (None, 5, "not_found"),
+            (5, -10, "bad_request"),
+            (5, 3, "success"),
+        ],
+    )
+    async def test_update_product_quantity(
+        self, repo, mock_session, initial_qty, delta, outcome
+    ):
+        product = ProductDAO(quantity=initial_qty) if initial_qty is not None else None
 
-    @pytest.mark.asyncio
-    async def test_update_product_nonexistent_id(self, repo):
-        nonexistent_id: int = 12345
-        new_product: ProductUpdateDTO = ProductUpdateDTO(
-            description="banana",
-            barcode="8501234567892",
-            price_per_unit=5,
-            quantity=20,
-            position="Z-1-1",
-            note="",
+        mock_session.get = AsyncMock(return_value=product)
+
+        if outcome == "success":
+            result = await repo.update_product_quantity(1, delta)
+            assert result.quantity == initial_qty + delta
+            mock_session.commit.assert_called_once()
+            mock_session.refresh.assert_called_once()
+        elif outcome == "bad_request":
+            with pytest.raises(BadRequestError):
+                await repo.update_product_quantity(1, delta)
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.update_product_quantity(1, delta)
+
+    @pytest.mark.parametrize(
+        "db_exists, barcode_conflict, outcome",
+        [
+            (False, False, "not_found"),
+            (True, True, "conflict"),
+            (True, False, "success"),
+        ],
+    )
+    async def test_update_product(
+        self, repo, mock_session, db_exists, barcode_conflict, outcome
+    ):
+        dto = ProductUpdateDTO(barcode="NEW123", description="updated")
+
+        product = ProductDAO(barcode="OLD123")
+
+        mock_session.get = AsyncMock(return_value=product if db_exists else None)
+
+        conflict_result = MagicMock()
+        conflict_result.scalars.return_value.first.return_value = (
+            ProductDAO() if barcode_conflict else None
         )
 
-        with pytest.raises(NotFoundError):
-            await repo.update_product(new_product, nonexistent_id)
+        mock_session.execute = AsyncMock(return_value=conflict_result)
 
-    @pytest.mark.asyncio
-    async def test_update_product_duplicate_barcode(self, repo):
-        old_product: ProductDAO = self.created_products[0]
-        duplicated_barcode: str = self.created_products[1].barcode  # type: ignore
-        new_product: ProductUpdateDTO = ProductUpdateDTO(
-            description="banana",
-            barcode=duplicated_barcode,
-            price_per_unit=5,
-            quantity=20,
-            position="Z-1-1",
-            note="",
-        )
+        if outcome == "success":
+            result = await repo.update_product(dto, product_id=1)
+            assert result.barcode == "NEW123"
+            assert result.description == "updated"
+            mock_session.commit.assert_called_once()
+            mock_session.refresh.assert_called_once()
+        elif outcome == "conflict":
+            with pytest.raises(ConflictError):
+                await repo.update_product(dto, product_id=1)
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.update_product(dto, product_id=1)
 
-        with pytest.raises(ConflictError):
-            await repo.update_product(new_product, old_product.id)
+    @pytest.mark.parametrize(
+        "product_exists, outcome",
+        [
+            (True, "success"),
+            (False, "not_found"),
+        ],
+    )
+    async def test_delete_product(self, repo, mock_session, product_exists, outcome):
+        product = ProductDAO() if product_exists else None
+        mock_session.get = AsyncMock(return_value=product)
 
-    @pytest.mark.asyncio
-    async def test_delete_product(self, repo):
-        created_product: ProductDAO = await repo.create_product(
-            "diaper", "0123456789050", 5, "", 150, "C-1-1"
-        )
-
-        status: bool = await repo.delete_product(created_product.id)
-
-        assert status == True
-        with pytest.raises(NotFoundError):
-            await repo.get_product(created_product.id)
-
-    @pytest.mark.asyncio
-    async def test_delete_product_nonexistent_id(self, repo):
-        nonexistent_id: int = 12345
-        with pytest.raises(NotFoundError):
-            await repo.delete_product(nonexistent_id)
+        if outcome == "success":
+            result = await repo.delete_product(1)
+            assert result is True
+            mock_session.delete.assert_called_once_with(product)
+            mock_session.commit.assert_called_once()
+        else:
+            with pytest.raises(NotFoundError):
+                await repo.delete_product(1)
