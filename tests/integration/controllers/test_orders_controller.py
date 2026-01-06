@@ -183,7 +183,7 @@ class TestOrdersController:
         ],
     )
     @pytest.mark.asyncio
-    async def test_record_arrival_flow(
+    async def test_record_arrival(
         self,
         db_session,
         setup_status,
