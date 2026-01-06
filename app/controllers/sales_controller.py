@@ -114,9 +114,7 @@ class SalesController:
             else BooleanResponseDTO(success=False)
         )
 
-    async def delete_sale(
-        self, sale_id: int, sold_products_controller
-    ) -> BooleanResponseDTO:
+    async def delete_sale(self, sale_id: int, sold_products_controller) -> None:
 
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status == "PAID":
@@ -125,17 +123,10 @@ class SalesController:
         for sold_product in sale.lines:
             # TODO:Waiting for /products/{id}/quantity implementation
             # self.product_controller.update_product_quantity(product.quantity, product.id)
-            success_prod: BooleanResponseDTO = (
-                await sold_products_controller.edit_sold_product_quantity(
-                    sold_product.id, sale.id, -sold_product.quantity
-                )
+            await sold_products_controller.edit_sold_product_quantity(
+                sold_product.id, sale.id, -sold_product.quantity
             )
-            if success_prod.success != True:
-                return BooleanResponseDTO(success=False)
-
-        success_sale: BooleanResponseDTO = await self.repo.delete_sale(sale_id)
-
-        return BooleanResponseDTO(success=True)
+        await self.repo.delete_sale(sale_id)
 
     async def edit_sold_product_quantity(
         self, sale_id: int, barcode: str, amount: int, sold_products_controller
