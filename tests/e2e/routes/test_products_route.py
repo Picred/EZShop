@@ -95,10 +95,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "product, expected_exception_code",
@@ -159,10 +159,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_id, expected_exception_code",
@@ -198,10 +198,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_barcode, expected_exception_code",
@@ -237,10 +237,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_description, expected_exception_code",
@@ -274,10 +274,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_id, expected_exception_code",
@@ -313,10 +313,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "product_id, product_update, expected_exception_code",
@@ -420,10 +420,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "product_id, product_update, expected_exception_code",
@@ -494,10 +494,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_id, new_position, expected_exception_code",
@@ -554,10 +554,10 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
 
     @pytest.mark.parametrize(
         "input_id, quantity, expected_exception_code",
@@ -599,7 +599,7 @@ class TestProductsRouter:
             headers=headers,
         )
 
-        if resp.status_code == 422:
-            resp.status_code = 400
-
-        assert resp.status_code == expected_exception_code
+        if expected_exception_code == 400:
+            assert resp.status_code in (expected_exception_code, 422)
+        else:
+            assert resp.status_code == expected_exception_code
