@@ -1,6 +1,7 @@
 from math import floor
 from typing import List, Optional
 
+from app.controllers.sold_products_controller import SoldProductsController
 from app.models.DAO.sale_dao import SaleDAO
 from app.models.DTO.boolean_response_dto import BooleanResponseDTO
 from app.models.DTO.change_response_dto import ChangeResponseDTO
@@ -115,30 +116,29 @@ class SalesController:
         )
 
     async def delete_sale(
-        self, sale_id: int, sold_products_controller
-    ) -> BooleanResponseDTO:
+        self, sale_id: int, sold_products_controller, products_controller
+    ) -> None:
 
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status == "PAID":
-            raise BadRequestError("Selected sale status is 'PAID'")
+            raise InvalidStateError("Selected sale status is 'PAID'")
 
         for sold_product in sale.lines:
-            # TODO:Waiting for /products/{id}/quantity implementation
-            # self.product_controller.update_product_quantity(product.quantity, product.id)
-            success_prod: BooleanResponseDTO = (
-                await sold_products_controller.edit_sold_product_quantity(
-                    sold_product.id, sale.id, -sold_product.quantity
-                )
+            products_controller.update_product_quantity(
+                sold_product.quantity, sold_product.id
             )
-            if success_prod.success != True:
-                return BooleanResponseDTO(success=False)
-
-        success_sale: BooleanResponseDTO = await self.repo.delete_sale(sale_id)
-
-        return BooleanResponseDTO(success=True)
+            await sold_products_controller.edit_sold_product_quantity(
+                sold_product.id, sale.id, -sold_product.quantity
+            )
+        await self.repo.delete_sale(sale_id)
 
     async def edit_sold_product_quantity(
-        self, sale_id: int, barcode: str, amount: int, sold_products_controller
+        self,
+        sale_id: int,
+        barcode: str,
+        amount: int,
+        sold_products_controller,
+        products_controller,
     ) -> BooleanResponseDTO:
 
         product_to_edit: Optional[SoldProductDTO] = None
@@ -156,10 +156,9 @@ class SalesController:
                 "product barcode '{barcode}' not found in sale {sale_id}"
             )
         else:
-            # TODO:Waiting for /products/{id}/quantity implementation
-            # self.product_controller.update_product_quantity(
-            #    product.id, product.quantity
-            # )
+            products_controller.update_product_quantity(
+                product_to_edit.id, product_to_edit.quantity
+            )
             success: BooleanResponseDTO = (
                 await sold_products_controller.edit_sold_product_quantity(
                     product_to_edit.id, sale.id, -amount
@@ -214,7 +213,9 @@ class SalesController:
 
         return BooleanResponseDTO(success=True)
 
-    async def close_sale(self, sale_id: int) -> BooleanResponseDTO:
+    async def close_sale(
+        self, sale_id: int, products_controller, sold_products_controller
+    ) -> BooleanResponseDTO:
         validate_field_is_present(str(sale_id), "sale_id")
         validate_field_is_positive(sale_id, "sale_id")
 
@@ -223,7 +224,9 @@ class SalesController:
             raise InvalidStateError("Selected sale status is not 'OPEN'")
 
         if len(sale.lines) == 0:
-            await self.delete_sale(sale_id)
+            await self.delete_sale(
+                sale_id, sold_products_controller, products_controller
+            )
         else:
             await self.repo.edit_sale_status(sale_id, "PENDING")
 
