@@ -7,15 +7,11 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.controllers.return_controller import ReturnController
 from app.database.database import Base
 from app.models.DAO.return_transaction_dao import ReturnTransactionDAO
-from app.models.DAO.returned_product_dao import ReturnedProductDAO
-from app.models.DAO.product_dao import ProductDAO
-from app.models.DAO.sale_dao import SaleDAO
 from app.models.DTO.sale_dto import SaleDTO
 from app.models.DTO.product_dto import ProductTypeDTO
 from app.models.errors.bad_request import BadRequestError
 from app.models.errors.invalid_state_error import InvalidStateError
 from app.models.errors.notfound_error import NotFoundError
-from app.models.errors.insufficient_quantity_sold_error import InsufficientQuantitySoldError
 from app.models.return_status_type import ReturnStatus
 from app.repositories.return_repository import ReturnRepository
 
@@ -184,7 +180,6 @@ class TestReturnController:
         with pytest.raises(NotFoundError):
             await controller.delete_return(999999)
 
-    @pytest.mark.skip(reason="Repository session refresh bug after delete - tested in E2E")
     async def test_close_return_transaction_success(self, db_session):
         """Test closing an open return (empty returns get deleted)"""
         # Note: This functionality is tested thoroughly in E2E tests
@@ -206,7 +201,6 @@ class TestReturnController:
 
         assert result.success is True
 
-    @pytest.mark.skip(reason="Repository session refresh bug after delete - tested in E2E")
     async def test_close_return_already_closed(self, db_session):
         """Test closing an already closed return"""
         # Note: This functionality is tested thoroughly in E2E tests
@@ -339,7 +333,6 @@ class TestReturnController:
                 returned_products_controller=mock_returned_products_controller,
             )
 
-    @pytest.mark.skip(reason="Repository session refresh bug after delete - tested in E2E")
     async def test_attach_product_to_closed_return(self, db_session):
         """Test attaching a product to a closed return (should fail)"""
         # Note: This functionality is tested thoroughly in E2E tests
