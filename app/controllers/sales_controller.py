@@ -98,7 +98,7 @@ class SalesController:
                 "Amount selected is greater than available stock"
             )
 
-        products_controller.update_product_quantity(product.quantity, product.id)
+        await products_controller.update_product_quantity(product.quantity, product.id)
 
         if product.id == None:
             raise BadRequestError("Invalid product")
@@ -125,7 +125,7 @@ class SalesController:
             raise InvalidStateError("Selected sale status is 'PAID'")
 
         for sold_product in sale.lines:
-            products_controller.update_product_quantity(
+            await products_controller.update_product_quantity(
                 sold_product.quantity, sold_product.id
             )
             await sold_products_controller.edit_sold_product_quantity(
@@ -163,7 +163,9 @@ class SalesController:
             await sold_products_controller.edit_sold_product_quantity(
                 product_to_edit.id, sale.id, -amount
             )
-            products_controller.update_product_quantity(product_to_edit.id, amount)
+            await products_controller.update_product_quantity(
+                product_to_edit.id, amount
+            )
 
         return BooleanResponseDTO(success=True)
 
