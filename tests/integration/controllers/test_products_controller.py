@@ -394,23 +394,67 @@ class TestProductsController:
                 ),
                 BadRequestError,
             ),
-            (
-                1,
-                ProductUpdateDTO(  # product present in a sale or an order
-                    description="Milk",
-                    barcode="4006381333931",
-                    price_per_unit=1.5,
-                    note="",
-                    quantity=10,
-                    position="A-1-1",
-                ),
-                InvalidStateError,
-            ),
         ],
     )
     async def test_update_product(
         self, db_session, product_id, product_update_dto, expected_exception
     ):
+        repo = ProductsRepository(session=db_session)
+        controller = ProductsController()
+        controller.repo = repo
+
+        mock_sold_products_controller = AsyncMock()
+        mock_orders_controller = AsyncMock()
+        mock_returned_products_controller = AsyncMock()
+
+        mock_sold_products_controller.get_sold_product_by_id.side_effect = (
+            NotFoundError("NotFound")
+        )
+        mock_orders_controller.get_order_by_product_barcode.side_effect = NotFoundError(
+            "NotFound"
+        )
+        mock_returned_products_controller.get_returned_products_by_id.side_effect = (
+            NotFoundError("NotFound")
+        )
+
+        dto = ProductCreateDTO(  # existing product
+            description="Coffee",
+            barcode="9780201379624",
+            price_per_unit=1.5,
+            note="",
+            quantity=10,
+            position="B-1-1",
+        )
+
+        await controller.create_product(dto)
+
+        if expected_exception is None:
+            result = await controller.update_product(
+                product_id,
+                product_update_dto,
+                mock_sold_products_controller,
+                mock_orders_controller,
+                mock_returned_products_controller,
+            )
+
+            assert result.success == True
+
+        else:
+            with pytest.raises(expected_exception):
+                await controller.update_product(
+                    product_id,
+                    product_update_dto,
+                    mock_sold_products_controller,
+                    mock_orders_controller,
+                    mock_returned_products_controller,
+                )
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "conflict_type",
+        [("sales"), ("returns"), ("orders")],
+    )
+    async def test_update_product_invalid_state(self, db_session, conflict_type):
         repo = ProductsRepository(session=db_session)
         controller = ProductsController()
         controller.repo = repo
@@ -427,82 +471,74 @@ class TestProductsController:
             quantity=10,
             position="B-1-1",
         )
+        update_dto = ProductUpdateDTO(
+            description="Milk",
+            barcode="4006381333931",
+            price_per_unit=1.5,
+            note="",
+            quantity=10,
+            position="A-1-1",
+        )
 
         await controller.create_product(dto)
 
-        if expected_exception is None:
-            mock_sold_products_controller.get_sold_product_by_id.side_effect = (
-                NotFoundError("NotFound")
-            )
+        if conflict_type == "sales":
+            mock_sold_products_controller.get_sold_product_by_id.return_value = True
             mock_orders_controller.get_order_by_product_barcode.side_effect = (
                 NotFoundError("NotFound")
             )
             mock_returned_products_controller.get_returned_products_by_id.side_effect = NotFoundError(
                 "NotFound"
             )
+            with pytest.raises(InvalidStateError) as info:
+                await controller.update_product(
+                    1,
+                    update_dto,
+                    mock_sold_products_controller,
+                    mock_orders_controller,
+                    mock_returned_products_controller,
+                )
 
-            result = await controller.update_product(
-                product_id,
-                product_update_dto,
-                mock_sold_products_controller,
-                mock_orders_controller,
-                mock_returned_products_controller,
+            assert "SALE" in str(info.value)
+        elif conflict_type == "returns":
+            mock_sold_products_controller.get_sold_product_by_id.side_effect = (
+                NotFoundError("NotFound")
             )
-
-            assert result.success == True
-
-        elif expected_exception is InvalidStateError:
+            mock_orders_controller.get_order_by_product_barcode.side_effect = (
+                NotFoundError("NotFound")
+            )
             mock_returned_products_controller.get_returned_products_by_id.return_value = (
                 True
             )
-            with pytest.raises(expected_exception):  # a return is present
+            with pytest.raises(InvalidStateError) as info:
                 await controller.update_product(
-                    product_id,
-                    product_update_dto,
+                    1,
+                    update_dto,
                     mock_sold_products_controller,
                     mock_orders_controller,
                     mock_returned_products_controller,
                 )
 
-            mock_orders_controller.get_order_by_product_barcode.return_value = True
-            with pytest.raises(expected_exception):  # an order is present
-                await controller.update_product(
-                    product_id,
-                    product_update_dto,
-                    mock_sold_products_controller,
-                    mock_orders_controller,
-                    mock_returned_products_controller,
-                )
+            assert "RETURN" in str(info.value)
 
-            mock_sold_products_controller.get_sold_product_by_id.return_value = True
-            with pytest.raises(expected_exception):  # a sale is present
-                await controller.update_product(
-                    product_id,
-                    product_update_dto,
-                    mock_sold_products_controller,
-                    mock_orders_controller,
-                    mock_returned_products_controller,
-                )
-
-        else:
+        elif conflict_type == "orders":
             mock_sold_products_controller.get_sold_product_by_id.side_effect = (
                 NotFoundError("NotFound")
             )
-            mock_orders_controller.get_order_by_product_barcode.side_effect = (
-                NotFoundError("NotFound")
-            )
+            mock_orders_controller.get_order_by_product_barcode.return_value = True
             mock_returned_products_controller.get_returned_products_by_id.side_effect = NotFoundError(
                 "NotFound"
             )
-
-            with pytest.raises(expected_exception):
+            with pytest.raises(InvalidStateError) as info:
                 await controller.update_product(
-                    product_id,
-                    product_update_dto,
+                    1,
+                    update_dto,
                     mock_sold_products_controller,
                     mock_orders_controller,
                     mock_returned_products_controller,
                 )
+
+            assert "ORDER" in str(info.value)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
