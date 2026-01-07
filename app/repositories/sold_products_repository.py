@@ -71,12 +71,11 @@ class SoldProductsRepository:
             result = await session.execute(
                 select(SoldProductDAO).filter(SoldProductDAO.id == product_id)
             )
+            if result is None:
+                raise NotFoundError("No products with id '{product_id}' sold")
             # products = result.scalar()
             products = list(result.scalars().all())
-            if products is None:
-                raise NotFoundError("No products with id '{product_id}' sold")
-            else:
-                return products
+            return products
 
     async def edit_sold_product_quantity(
         self, id: int, sale_id: int, quantity: int
@@ -91,11 +90,9 @@ class SoldProductsRepository:
                     (SoldProductDAO.id == id) & (SoldProductDAO.sale_id == sale_id)
                 )
             )
-
-            sold_product: SoldProductDAO = result.scalar()
-
-            if sold_product is None:
+            if result is None:
                 raise NotFoundError("Sold product not found with the given IDs")
+            sold_product: SoldProductDAO = result.scalar()
 
             if sold_product.quantity + quantity < 0:  # type: ignore
                 raise BadRequestError(
@@ -122,10 +119,9 @@ class SoldProductsRepository:
                 )
             )
 
-            sold_product: SoldProductDAO = result.scalar()
-
-            if sold_product is None:
+            if result is None:
                 raise NotFoundError("Sold product not found with the given IDs")
+            sold_product: SoldProductDAO = result.scalar()
 
             sold_product.discount_rate = discount_rate  # type: ignore
             await session.commit()
