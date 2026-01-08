@@ -98,7 +98,9 @@ class SalesController:
                 "Amount selected is greater than available stock"
             )
 
-        await products_controller.update_product_quantity(product.quantity, product.id)
+        await products_controller.update_product_quantity(
+            quantity=product.quantity, product_id=product.id
+        )
 
         if product.id == None:
             raise BadRequestError("Invalid product")
