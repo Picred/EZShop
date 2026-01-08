@@ -548,6 +548,74 @@ class TestProductsRouter:
         else:
             assert resp.status_code == expected_exception_code
 
+    @pytest.mark.parametrize("conflict_type", ["sale", "order"])
+    def test_edit_product_invalid_state(self, client, auth_tokens, conflict_type):
+        headers = auth_header(auth_tokens, "admin")
+        product = {
+            "description": "Test product",
+            "barcode": "9771234567898",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 10,
+            "position": "D-3-1",
+        }
+
+        update = {
+            "description": "Updated test product",
+            "barcode": "9783161484100",
+        }
+
+        resp = client.post(  # create product to update
+            BASE_URL + "/products",
+            json=product,
+            headers=headers,
+        )
+
+        product_id = 4
+
+        if conflict_type == "sale":
+            client.post(  # create new empty sale
+                BASE_URL + "/sales",
+                headers=headers,
+            )
+            client.post(  # add created product to the sale
+                BASE_URL
+                + "/sales/"
+                + "1/"
+                + "items?"
+                + "barcode=9771234567898&"
+                + "amount=5",
+                headers=headers,
+            )
+
+            resp = client.put(  # product cannot be modified if belonging to a sale
+                BASE_URL + "/products/" + str(product_id),
+                json=update,
+                headers=headers,
+            )
+
+            assert resp.status_code == 420
+        elif conflict_type == "order":
+            order = {
+                "product_barcode": "9771234567898",
+                "quantity": 100,
+                "price_per_unit": 9.99,
+            }
+
+            client.post(  # new order containing the product
+                BASE_URL + "/orders",
+                json=order,
+                headers=headers,
+            )
+
+            resp = client.put(  # product cannot be modified if belonging to an order
+                BASE_URL + "/products/" + str(product_id),
+                json=update,
+                headers=headers,
+            )
+
+            assert resp.status_code == 420
+
     @pytest.mark.parametrize(
         "input_id, role, new_position, expected_exception_code",
         [
