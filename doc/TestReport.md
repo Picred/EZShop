@@ -53,6 +53,31 @@ A bottom-up approach has been used, starting from running unit-tests for the var
 | test_create_and_pay_order    | OrdersRepository.create_and_pay_order  |  Unit      | WB / Statement Coverage                                 |
 | test_get_orders_by_barcode   | OrdersRepository.get_orders_by_barcode |  Unit      | WB / Statement Coverage                                 |
 
+### CustomerRepository
+
+| Test case name               | Object(s) tested                       | Test level | Technique used                                           |
+|:-----------------------------|:-------------------------------------- |:----------:|:---------------------------------------------------------|
+| test_create_customer         | CustomerRepository.create_customer          |  Unit      | WB / Statement Coverage |        
+| test_create_customer_with_card_already_attached         | CustomerRepository.create_customer          |  Unit      | WB / Decision Coverage                            |
+| test_list_customer             | CustomerRepository.list_customer           |  Unit      | WB / Statement Coverage                                           |
+| test_list_customer_empty             | CustomerRepository.list_customer           |  Unit      | WB / Decision Coverage |
+| test_get_customer               | CustomerRepository.get_customer             |  Unit      | WB / Decision Coverage                                              |
+| test_update_customer_with_card_success               | CustomerRepository.update_customer             |  Unit      | WB / Statement Coverage   |
+| test_update_customer_card_not_found        | CustomerRepository.update_customer             |  Unit      | WB / Decision Coverage   |
+| test_update_customer_card_already_attached               | CustomerRepository.update_customer             |  Unit      | WB / Decision Coverage   |
+| test_update_customer_not_found               | CustomerRepository.update_customer             |  Unit      | WB / Decision Coverage   |
+| test_update_customer_only_name             | CustomerRepository.update_customer_only_name             |  Unit      | WB / Decision Coverage                                |
+| test_delete_customer_success          | CustomerRepository.delete_customer        |  Unit      | WB / Statement Coverage                                  |
+|test_delete_customer_not_found          | CustomerRepository.delete_customer        |  Unit      | WB / Decision Coverage                                |  
+| test_create_card     | CustomerRepository.create_card  |  Unit      | WB / Boundary Coverage |
+| test_attach_card_success   | CustomerRepository.attach_card |  Unit      | WB / Statement Coverage |
+| test_attach_card_card_not_found   | CustomerRepository.attach_card |  Unit      | WB / Decision Coverage |
+| test_attach_card_customer_not_found   | CustomerRepository.attach_card |  Unit      | WB / Decision Coverage |
+| test_attach_card_already_attached   | CustomerRepository.attach_card |  Unit      | WB / Decision Coverage |
+| test_modify_point   | CustomerRepository.modify_point |  Unit      | WB / Statement Coverage                                 |
+| test_modify_point_card_not_found   | CustomerRepository.modify_point |  Unit      | WB / Decision Coverage                                 |
+| test_get_card_by_id_success   | CustomerRepository.get_card_by_id |  Unit      | WB / Statement Coverage                                 |
+| test_get_card_by_id_not_found   | CustomerRepository.get_card_by_id |  Unit      | WB / Decision Coverage                                 |
 
 ## Integration Testing
 
@@ -89,6 +114,23 @@ A bottom-up approach has been used, starting from running unit-tests for the var
 | test_pay_order                    | OrdersController.pay_order                      |   Integration  | BB / Equivalence Partitioning                           |
 | test_record_arrival               | OrdersController.record_arrival                 |   Integration  | BB / Equivalence Partitioning                           |
 | test_get_order_by_product_barcode | OrdersController.get_order_by_product_barcode   |   Integration  | BB / Equivalence Partitioning                           |
+
+
+### CustomerController
+
+|         Test case name            | Object(s) tested                                |   Test level   |         Technique used                                  |
+|:--------------------------------: |:----------------------------------------------: |:--------------:|:--------------------------------------------------------|
+| test_create_customer               | CustomerController.create_customer               |  Integration   | BB / Equivalence Partitioning                           |
+| test_list_customers                | CustomerController.list_customer                |  Integration   | BB / Equivalence Partitioning                           |
+| test_get_customer_by_id                  | CustomerController.get_customer                  |  Integration   | BB / Equivalence Partitioning / Boundary                           |
+| test_update_customer       | CustomerController.update_customer       |  Integration   | BB / Equivalence Partitioning                           |
+| test_update_customer_detach_card       | CustomerController.update_customer       |  Integration   | BB /   Boundary                           |
+| test_update_customer_with_card_already_attached       | CustomerController.update_customer       |  Integration   | BB / Equivalence Partitioning                           |
+| test_delete_customer   | CustomerController.delete_customer   |  Integration   | BB / Equivalence Partitioning                           |
+| test_create_card      | CustomerController.create_card      |  Integration   | BB / Boundary                           |
+| test_attach_card      | CustomerController.attach_card      |  Integration   | BB / Equivalence Partitioning / Boundary                            |
+| test_modify_point               | CustomerController.modify_point               |  Integration   | BB / Equivalence Partitioning / Boundary                           |
+
 
 ## End to end Testing
 
@@ -132,6 +174,21 @@ A bottom-up approach has been used, starting from running unit-tests for the var
 | test_pay_order                     | OrdersRouter.pay_order (auth)          | End to End | BB / Equivalence Partitioning                           |
 | test_record_arrival_authentication | OrdersRouter.record_arrival (auth)     | End to End | BB / Equivalence Partitioning                           |
 | test_record_arrival                | OrdersRouter.record_arrival            | End to End | BB / Equivalence Partitioning                           |
+
+### CustomerRouter
+
+|         Test case name            | Object(s) tested                                |   Test level   |         Technique used                                  |
+|:--------------------------------: |:----------------------------------------------: |:--------------:|:--------------------------------------------------------|
+| test_create_customer               | CustomerRouter.create_customer                   |  End to End    | BB / Equivalence Partitioning                           |
+| test_list_customers                | CustomerRouter.list_customer                    |  End to End    | BB / Equivalence Partitioning                           |
+| test_get_customer                  | CustomerRouter.get_customer                      |  End to End    | BB / Equivalence Partitioning                           |
+| test_update_customer       | CustomerRouter.update_customer           |  End to End    | BB / Equivalence Partitioning                           |
+| test_delete_customer   | CustomerRouter.delete_customer       |  End to End    | BB / Equivalence Partitioning                           |
+| test_delete_customer_with_card      | CustomerRouter.delete_customer          |  End to End    | BB / Equivalence Partitioning                           |
+| test_create_card      | CustomerRouter.create_card          |  End to End    | BB / Equivalence Partitioning                           |
+| test_attach_card               | CustomerRouter.attach_card                   |  End to End    | BB / Equivalence Partitioning                           |
+| test_attach_card_already_attached               | CustomerRouter.attach_card                   |  End to End    | BB / Equivalence Partitioning                           |
+| test_modify_points               | CustomerRouter.modify_point                   |  End to End    | BB / Equivalence Partitioning                           |
 
 
 # Coverage
