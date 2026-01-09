@@ -557,13 +557,18 @@ class TestProductsRouter:
             "barcode": "9783161484100",
         }
 
-        resp = client.post(  # create product to update
+        client.post(  # create product to update
             BASE_URL + "/products",
             json=product,
             headers=headers,
         )
 
-        product_id = 4
+        resp = client.get(
+            BASE_URL + "/products/barcode/" + "9771234567898",
+            headers=headers,
+        )
+
+        product_id = resp.json()["id"]
 
         if conflict_type == "sale":
             client.post(  # create new empty sale
@@ -716,3 +721,69 @@ class TestProductsRouter:
             assert resp.status_code in (expected_exception_code, 422)
         else:
             assert resp.status_code == expected_exception_code
+
+    @pytest.mark.parametrize("conflict_type", ["sale", "order"])
+    def test_delete_product_invalid_state(self, client, auth_tokens, conflict_type):
+        headers = auth_header(auth_tokens, "admin")
+        product = {
+            "description": "Test product",
+            "barcode": "9771234567898",
+            "price_per_unit": 9.99,
+            "note": "",
+            "quantity": 10,
+            "position": "D-3-1",
+        }
+
+        client.post(  # create product to update
+            BASE_URL + "/products",
+            json=product,
+            headers=headers,
+        )
+
+        resp = client.get(
+            BASE_URL + "/products/barcode/" + "9771234567898",
+            headers=headers,
+        )
+
+        product_id = resp.json()["id"]
+
+        if conflict_type == "sale":
+            client.post(  # create new empty sale
+                BASE_URL + "/sales",
+                headers=headers,
+            )
+            client.post(  # add created product to the sale
+                BASE_URL
+                + "/sales/"
+                + "1/"
+                + "items?"
+                + "barcode=9771234567898&"
+                + "amount=5",
+                headers=headers,
+            )
+
+            resp = client.delete(  # product cannot be modified if belonging to a sale
+                BASE_URL + "/products/" + str(product_id),
+                headers=headers,
+            )
+
+            assert resp.status_code == 420
+        elif conflict_type == "order":
+            order = {
+                "product_barcode": "9771234567898",
+                "quantity": 100,
+                "price_per_unit": 9.99,
+            }
+
+            client.post(  # new order containing the product
+                BASE_URL + "/orders",
+                json=order,
+                headers=headers,
+            )
+
+            resp = client.delete(  # product cannot be modified if belonging to an order
+                BASE_URL + "/products/" + str(product_id),
+                headers=headers,
+            )
+
+            assert resp.status_code == 420
