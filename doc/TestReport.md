@@ -504,12 +504,12 @@ test_edit_product_discount_controllore_not_found, test_edit_discount_ok,test_edi
 |             Scenario 4-1           |                                     |
 |             Scenario 5-1           |                                     |
 |             Scenario 5-2           |                                     |
-|             Scenario 6-1           |                                     |
-|             Scenario 6-2           |                                     |
-|             Scenario 6-3           |                                     |
-|             Scenario 6-4           |                                     |
-|             Scenario 6-5           |                                     |
-|             Scenario 6-6           |                                     |
+|             Scenario 6-1           |test_create_sale_route, test_product_added_route, test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route                                       |
+|             Scenario 6-2           |test_create_sale_route, test_product_added_route,test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route, test_set_product_discount                                    |
+|             Scenario 6-3           |test_create_sale_route, test_product_added_route,test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route, test_set_sale_discount                                      |
+|             Scenario 6-4           |test_create_sale_route, test_product_added_route,test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route,test_points_route_ok                                     |
+|             Scenario 6-5           | test_create_sale_route, test_product_added_route,test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route, test_delete_sale_route                                    |
+|             Scenario 6-6           |test_create_sale_route, test_product_added_route,test_remove_product_route_ok, test_close_sale_route_ok, test_close_paid_route,                                     |
 |             Scenario 7-1           | test_create_return_transaction_success, test_attach_product_to_return_success, test_close_return_transaction_success, test_reimburse_return_transaction_success (e2e) |
 |             Scenario 7-2           | test_create_return_transaction_success, test_attach_product_to_return_success, test_delete_product_from_return_success, test_close_return_transaction_success, test_reimburse_return_transaction_success (e2e) |
 |             Scenario 7-3           | test_list_returns_for_sale_id_success (e2e) |
