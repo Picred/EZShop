@@ -436,11 +436,10 @@ Partitioning
 |                FR1.4               |                                     |
 |                FR1.5               |                                     |
 |                FR3                 |                                     |
-|                FR3.1               |test_create_product,test_update_product_position, test_update_product_quantity,test_update_product, test_update_product_invalid_state, test_update_product_duplicates|                                 
+|                FR3.1               |test_create_product,test_update_product_position, test_update_product_quantity, test_update_product, test_update_product_invalid_state, test_update_product_duplicates|                                 
 |                FR3.2               |       test_delete_product           |
 |                FR3.3               |        test_list_products           |
-|                FR3.4               |test_get_product, test_get_product_by_barcode,|
-|                                    |   test_get_product_by_description   |
+|                FR3.4               |test_get_product, test_get_product_by_barcode, test_get_product_by_description   |
 |                FR4                 |                                     |
 |                FR4.1               |                                     |
 |                FR4.2               |                                     |
@@ -462,9 +461,7 @@ Partitioning
 |                FR6.2               |      test_create_sold_product_ok, test_create_sold_product_conflict, test_add_product_ok,test_add_product_invalid_input,test_add_product_invalid_status, test_add_product_not_found, test_product_added_route,test_attach_product_to_return_success (e2e)                               |
 |                FR6.3               |  test_remove_ok, test_remove_sold_product_ok, test_remove_sold_product_invalid_input, test_remove_product_route_ok,test_delete_product_from_return_success (e2e)                                    |
 |                FR6.4               | test_set_discount,  test_edit_sale_discount_controller_ok,test_edit_sale_discount_controller_invalid_input, test_edit_sale_discount_controller_not_found, test_edit_sale_discount_controller_invalid_status,test_edit_sale_ok,test_edit_sale_discount_invalid_status, test_edit_sale_discount_not_found, test_close_return_transaction_success (e2e)                                    |
-|                FR6.5               | test_set_discount_product_route, test_edit_product_discount_controllore_ok,test_edit_product_discount_controllore_invalid_input,
-test_edit_product_discount_controllore_invalid_status,
-test_edit_product_discount_controllore_not_found, test_edit_discount_ok,test_edit_discount_not_found,test_list_all_returns (e2e)                                   |
+|                FR6.5               | test_set_discount_product_route, test_edit_product_discount_controllore_ok,test_edit_product_discount_controllore_invalid_input, test_edit_product_discount_controllore_invalid_status, test_edit_product_discount_controllore_not_found, test_edit_discount_ok,test_edit_discount_not_found,test_list_all_returns (e2e)                                   |
 |                FR6.6               | test_get_point_controller_ok, test_get_point_controller_invalid_input, test_get_point_controller_invalid_status, test_get_point_controller_not_found, test_point_route_ok,test_get_return_by_id (e2e)                                   |
 |                FR6.7               |   test_list_returns_for_sale_id_success (e2e)                                  |
 |                FR6.8               | test_get_sale_id_route_ok, test_get_sale_controller_ok,test_get_sale_controller_invalid_input,test_get_sale_controller_not_found, test_get_sale_by_id_ok, test_get_sale_by_id_not_found, test_delete_return_success (e2e)                                    |
