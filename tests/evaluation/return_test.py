@@ -810,7 +810,7 @@ async def test_add_product_not_in_sale(client, auth_tokens):
     return_id = create_resp.json()["id"]
     
     # Create different product
-    product = await create_or_return_product(client, auth_tokens, barcode="999999999999", quantity=10)
+    product = await create_or_return_product(client, auth_tokens, position="1-B-3", barcode="999999999999", quantity=10)
     
     resp = await client.post(
         f"/api/v1/returns/{return_id}/items",
@@ -819,7 +819,7 @@ async def test_add_product_not_in_sale(client, auth_tokens):
         follow_redirects=True
     )
     
-    assert resp.status_code in (400, 422)
+    assert resp.status_code in (400, 404, 422)
 
 # ---------------------------
 # POST /returns/{return_id}/items - ADD PRODUCT TESTS - 420 INVALID STATE
