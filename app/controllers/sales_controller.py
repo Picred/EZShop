@@ -98,9 +98,7 @@ class SalesController:
                 "Amount selected is greater than available stock"
             )
 
-        await products_controller.update_product_quantity(
-            quantity=product.quantity, product_id=product.id
-        )
+        await products_controller.update_product_quantity(product.id, -product.quantity)
 
         if product.id == None:
             raise BadRequestError("Invalid product")
@@ -111,11 +109,7 @@ class SalesController:
             )
         )
 
-        return (
-            BooleanResponseDTO(success=True)
-            if sold_product
-            else BooleanResponseDTO(success=False)
-        )
+        return BooleanResponseDTO(success=True)
 
     async def delete_sale(
         self, sale_id: int, sold_products_controller, products_controller
@@ -144,6 +138,7 @@ class SalesController:
         products_controller,
     ) -> BooleanResponseDTO:
         validate_field_is_positive(sale_id, "product_id")
+        validate_field_is_positive(amount, "amount")
         validate_field_is_present(barcode, "barcode")
         validate_product_barcode(barcode)
 
@@ -156,22 +151,24 @@ class SalesController:
         for product in sale.lines:
             if product.product_barcode == barcode:
                 product_to_edit = product
-                product_in_inventory=await products_controller.get_product_by_barcode(barcode)
+                product_in_inventory = await products_controller.get_product_by_barcode(
+                    barcode
+                )
+                break
+
         if product_to_edit is None:
             raise NotFoundError(
                 "product barcode '{barcode}' not found in sale {sale_id}"
             )
-        if product_to_edit.quantity+amount<0 or product_in_inventory.quantity-amount<0:
-            raise InsufficientStockError("too much quantity")
-        
+        if product_to_edit.quantity - amount < 0:
+            raise InsufficientStockError("insufficient quantity present in sale")
+        if product_in_inventory.quantity - amount < 0:
+            raise InsufficientStockError("insufficient stock in inventory")
+
         await sold_products_controller.edit_sold_product_quantity(
-            product_to_edit.id, sale.id, amount
+            product_to_edit.id, sale.id, -amount
         )
-        await products_controller.update_product_quantity(
-            product_to_edit.id, -amount
-        )
-        if product_to_edit.quantity+amount==0:
-           await sold_products_controller.remove_sold_product(sale_id,product_to_edit.id, barcode)
+        await products_controller.update_product_quantity(product_to_edit.id, -amount)
 
         return BooleanResponseDTO(success=True)
 
@@ -199,7 +196,7 @@ class SalesController:
         validate_product_barcode(product_barcode)
         validate_discount_rate(discount_rate)
 
-        product_to_edit: SoldProductDTO=None
+        product_to_edit: SoldProductDTO
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status != "OPEN":
             raise InvalidStateError("Selected sale status is not 'OPEN'")
@@ -207,7 +204,7 @@ class SalesController:
         for product in sale.lines:
             if product.product_barcode == product_barcode:
                 product_to_edit = product
-        if product_to_edit==None:
+        if product_to_edit == None:
             raise NotFoundError("")
         success: BooleanResponseDTO = (
             await sold_products_controller.edit_sold_product_discount(
@@ -247,12 +244,12 @@ class SalesController:
 
         amount_needed: float = await self.get_sale_value(sale_id)
         change: float = cash_amount - amount_needed
-        if change > 0:
+        if change >= 0:
             await self.repo.edit_sale_status(sale_id, "PAID")
         else:
             raise BadRequestError("amount is not enough to pay the sale")
 
-        return ChangeResponseDTO(change=round(change,2))
+        return ChangeResponseDTO(change=round(change, 2))
 
     async def get_sale_value(self, sale_id: int) -> float:
         validate_field_is_present(str(sale_id), "sale_id")
