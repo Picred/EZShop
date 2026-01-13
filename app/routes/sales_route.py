@@ -176,11 +176,11 @@ async def delete_sale(sale_id: int) -> None:
         )
     ],
 )
-async def edit_product_quantity(
+async def remove_product_quantity(
     sale_id: int, barcode: str, amount: int
 ) -> BooleanResponseDTO:
     """
-    delete a product from an OPEN sale
+    remove specified quantity from a product present in an OPEN sale
 
     - Permissions: Administrator, ShopManager, Cashier
     - Request body: sale_id as int
@@ -192,10 +192,10 @@ async def edit_product_quantity(
     - Status code: 420 invalid sale status
     """
 
-    return await controller.edit_sold_product_quantity(
+    return await controller.remove_sold_product_quantity(
         sale_id,
         barcode,
-        amount,
+        -amount,
         sold_products_controller=sold_products_controller,
         products_controller=products_controller,
     )

@@ -98,7 +98,7 @@ class SalesController:
                 "Amount selected is greater than available stock"
             )
 
-        await products_controller.update_product_quantity(product.id, -product.quantity)
+        await products_controller.update_product_quantity(product.id, -amount)
 
         if product.id == None:
             raise BadRequestError("Invalid product")
@@ -129,6 +129,21 @@ class SalesController:
             )
         await self.repo.delete_sale(sale_id)
 
+    async def remove_sold_product_quantity(
+        self,
+        sale_id: int,
+        barcode: str,
+        amount: int,
+        sold_products_controller,
+        products_controller,
+    ) -> BooleanResponseDTO:
+        validate_field_is_positive(amount, "amount")
+
+        await self.edit_sold_product_quantity(
+            sale_id, barcode, -amount, sold_products_controller, products_controller
+        )
+        return BooleanResponseDTO(success=True)
+
     async def edit_sold_product_quantity(
         self,
         sale_id: int,
@@ -138,7 +153,6 @@ class SalesController:
         products_controller,
     ) -> BooleanResponseDTO:
         validate_field_is_positive(sale_id, "product_id")
-        validate_field_is_positive(amount, "amount")
         validate_field_is_present(barcode, "barcode")
         validate_product_barcode(barcode)
 
@@ -152,7 +166,7 @@ class SalesController:
             if product.product_barcode == barcode:
                 product_to_edit = product
                 product_in_inventory = await products_controller.get_product_by_barcode(
-                    barcode
+                    product.product_barcode
                 )
                 break
 
@@ -160,13 +174,14 @@ class SalesController:
             raise NotFoundError(
                 "product barcode '{barcode}' not found in sale {sale_id}"
             )
-        if product_to_edit.quantity - amount < 0:
+
+        if product_to_edit.quantity + amount < 0:
             raise InsufficientStockError("insufficient quantity present in sale")
         if product_in_inventory.quantity - amount < 0:
             raise InsufficientStockError("insufficient stock in inventory")
 
         await sold_products_controller.edit_sold_product_quantity(
-            product_to_edit.id, sale.id, -amount
+            product_to_edit.id, sale.id, amount
         )
         await products_controller.update_product_quantity(product_to_edit.id, -amount)
 
@@ -196,7 +211,7 @@ class SalesController:
         validate_product_barcode(product_barcode)
         validate_discount_rate(discount_rate)
 
-        product_to_edit: SoldProductDTO
+        product_to_edit: SoldProductDTO = None  # type: ignore
         sale: SaleDTO = await self.get_sale_by_id(sale_id)
         if sale.status != "OPEN":
             raise InvalidStateError("Selected sale status is not 'OPEN'")
@@ -204,6 +219,8 @@ class SalesController:
         for product in sale.lines:
             if product.product_barcode == product_barcode:
                 product_to_edit = product
+                break
+
         if product_to_edit == None:
             raise NotFoundError("")
         success: BooleanResponseDTO = (
