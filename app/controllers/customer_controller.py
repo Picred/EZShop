@@ -20,6 +20,8 @@ class CustomerController:
         customer_input(customer_dto)
         card = None
         if customer_dto.card is not None and customer_dto.card.card_id is not None:
+            if await self.repo.get_card_by_id(customer_dto.card.card_id) is None:
+                raise NotFoundError("card with ID:"+customer_dto.card.card_id+"not found")
             customer_dto.card.card_id = customer_dto.card.card_id.zfill(10)
             created = await self.repo.create_customer(
                 customer_dto.name, customer_dto.card.card_id, customer_dto.card.points
