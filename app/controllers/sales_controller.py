@@ -139,8 +139,8 @@ class SalesController:
             # remove sold product
             await sold_products_controller.remove_sold_product(sale.id, sold_product.id)
             # restore inventory quantity
-            await products_controller.update_product_quantity(
-                sold_product.quantity, sold_product.id
+            await products_controller.update_product_quantity(sold_product.id,
+                sold_product.quantity
             )
 
         await self.repo.delete_sale(sale_id)
