@@ -1002,7 +1002,7 @@ class TestReturnsRouter:
             f"{BASE_URL}/balance/set/?amount=10000",
             headers=auth_header(auth_tokens, "admin"),
         )
-
+        expected_refund = 2 * 9.99
         # Create return with products and close it
         sale_id, barcode = create_sale_with_products(client, auth_tokens, amount=2)
         return_resp = client.post(
@@ -1034,7 +1034,7 @@ class TestReturnsRouter:
         )
 
         assert resp.status_code == 200
-        assert resp.json()["success"] is True
+        assert resp.json()["refund_amount"] == expected_refund
 
         # Verify the return status changed to REIMBURSED (MANDATORY check)
         get_resp = client.get(
@@ -1045,7 +1045,7 @@ class TestReturnsRouter:
         assert return_data["status"] == "REIMBURSED"
 
         # Verify exact balance change (2 items * 9.99 price)
-        expected_refund = 2 * 9.99
+        
         balance_after = client.get(
             f"{BASE_URL}/balance",
             headers=auth_header(auth_tokens, "admin"),
