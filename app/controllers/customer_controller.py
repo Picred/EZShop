@@ -29,7 +29,7 @@ class CustomerController:
             if created.cardId is not None:
                 card = await self.repo.get_card_by_id(customer_dto.card.card_id)
         else:
-            created = await self.repo.create_customer(customer_dto.name, None, 0)
+            created = await self.repo.create_customer(customer_dto.name, "-000000000", 0)
         return customerdao_to_responsedto(created, card)
 
     async def list_customer(self) -> List[CustomerDTO]:
