@@ -30,13 +30,13 @@ productivity = ((LOC of production code)+ (LOC of test code)) / effort
 
 ## Comparison
 
-|                                        | Estimated (end of task 1) | Actual (jan 18, end of task 3)|
-| -------------------------------------------------------------------------------- | -------- |----|
-| production code size | unknown  ||
-| test code size | unknown ||
-| total size  |||
-| effort |||
-| productivity  | 10 loc / hour ||
+|                                        | Estimated (end of task 1)               | Actual (jan 18, end of task 3)|
+| ---------------------------------------|---------------------------------------- | ------------------------------|
+| production code size                   | 6050                                    |              3381             |
+| test code size                         | n/a                                     |             13054             |
+| total size                             | 6050                                    |             16435             |
+| effort                                 | 605                                     |               422             |
+| productivity                           | 10 loc / hour                           |          39 loc / hour        |
 
 
 Report, as estimate of effort, the value obtained via activity decomposition technique.  The comparison is meaningful for productivity, since the stimates for size and effort were not based on the Official requirements.
