@@ -449,8 +449,8 @@ Partitioning
 |                FR4.6               |      test_record_arrival       |
 |                FR4.7               |       test_list_orders         |
 |                FR 5                |                                     |
-|                FR5.1               |    test_update_customer        |
-|                FR5.2               |   test_delete_customer,test_delete_customer_with_card         |
+|                FR5.1               |     test_create_customer, test_update_customer        |
+|                FR5.2               |   test_delete_customer, test_delete_customer_with_card         |
 |                FR5.3               |    test_get_customer           |
 |                FR5.4               |    test_list_customers         |
 |                FR5.5               |   test_create_card             |
@@ -491,8 +491,8 @@ Partitioning
 |             Scenario 3-2           |       test_pay_order           |
 |             Scenario 3-3           |      test_record_arrival       |
 |             Scenario 4-1           |      test_create_customer      |
-|             Scenario 4-2           |test_create_card, test_attach_card |
-|             Scenario 4-3           |      test_update_customer      |
+|             Scenario 4-2           |test_attach_card, test_attach_card_already_attached |
+|             Scenario 4-3           |      test_update_customer, test_update_customer_detach_card      |
 |             Scenario 4-4           |      test_update_customer      |
 |             Scenario 4-1           |                                     |
 |             Scenario 5-1           |                                     |
