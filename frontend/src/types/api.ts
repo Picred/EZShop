@@ -18,6 +18,12 @@ export interface UserCreateRequest {
   type: UserType;
 }
 
+export interface UserUpdateRequest {
+  username?: string;
+  password?: string;
+  type?: UserType;
+}
+
 export interface TokenResponse {
   token: string;
 }
@@ -113,4 +119,31 @@ export interface ErrorResponse {
   code: number;
   message: string;
   name: string;
+}
+
+// Dashboard types
+export interface KPIDTO {
+  value: number;
+  change: number;
+}
+
+export interface ChartDataPointDTO {
+  label: string;
+  value: number;
+}
+
+export interface ProductStatDTO {
+  barcode: string;
+  description: string;
+  quantity_sold: number;
+  revenue: number;
+}
+
+export interface DashboardDTO {
+  total_revenue: KPIDTO;
+  total_sales: KPIDTO;
+  active_orders: KPIDTO;
+  total_products: KPIDTO;
+  earnings_trend: ChartDataPointDTO[];
+  top_products: ProductStatDTO[];
 }

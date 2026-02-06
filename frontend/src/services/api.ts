@@ -35,11 +35,13 @@ api.interceptors.response.use(
   (error) => {
     console.error('[API] Response error:', error.response?.status, error.config?.url, error.config?.baseURL);
     if (error.response?.status === 401) {
-      console.warn('[API] 401 Unauthorized - redirecting to login');
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Don't redirect if we're already on the login page or if it's a login request
+      if (!window.location.pathname.includes('/login') && !error.config.url.includes('/auth')) {
+        console.warn('[API] 401 Unauthorized - redirecting to login');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

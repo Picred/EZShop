@@ -17,13 +17,13 @@ export const ordersService = {
     return response.data;
   },
 
-  async pay(id: number): Promise<Order> {
-    const response = await api.patch<Order>(`/orders/${id}/pay`);
+  async pay(id: number): Promise<{ success: boolean }> {
+    const response = await api.patch<{ success: boolean }>(`/orders/${id}/pay`);
     return response.data;
   },
 
-  async recordArrival(id: number): Promise<Order> {
-    const response = await api.patch<Order>(`/orders/${id}/arrival`);
+  async recordArrival(id: number): Promise<{ success: boolean }> {
+    const response = await api.patch<{ success: boolean }>(`/orders/${id}/arrival`);
     return response.data;
   },
 };

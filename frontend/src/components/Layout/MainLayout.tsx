@@ -6,9 +6,12 @@ import {
   TrendingUp,
   FileText,
   Truck,
+  RotateCcw,
   LogOut,
   ShoppingBag,
   User,
+  DollarSign,
+  Users,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -27,6 +30,10 @@ export const MainLayout = () => {
     { path: '/inventory', icon: Package, label: 'Inventory' },
     { path: '/orders', icon: Truck, label: 'Orders' },
     { path: '/sales', icon: ShoppingCart, label: 'Sales' },
+    { path: '/returns', icon: RotateCcw, label: 'Returns' },
+    { path: '/accounting', icon: DollarSign, label: 'Accounting' },
+    { path: '/customers', icon: Users, label: 'Customers' },
+    { path: '/users', icon: User, label: 'Users' },
     { path: '/analytics', icon: TrendingUp, label: 'Analytics' },
     { path: '/reports', icon: FileText, label: 'Reports' },
   ];

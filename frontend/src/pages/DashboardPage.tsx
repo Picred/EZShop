@@ -1,19 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Users, DollarSign, Package, ShoppingCart } from 'lucide-react';
-import { salesService } from '../services/salesService';
-import { ordersService } from '../services/ordersService';
-import { productsService } from '../services/productsService';
-import { accountingService } from '../services/accountingService';
+import { dashboardService } from '../services/dashboardService';
+import { DashboardDTO } from '../types/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [kpis, setKpis] = useState({
-    totalRevenue: { value: 0, change: 0 },
-    totalSales: { value: 0, change: 0 },
-    activeOrders: { value: 0, change: 0 },
-    totalProducts: { value: 0, change: 0 },
-  });
-
+  const [data, setData] = useState<DashboardDTO | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -22,21 +16,12 @@ export const DashboardPage = () => {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
-      const [sales, orders, products, balance] = await Promise.all([
-        salesService.getAll(),
-        ordersService.getAll(),
-        productsService.getAll(),
-        accountingService.getBalance(),
-      ]);
-
-      setKpis({
-        totalRevenue: { value: balance, change: 0 },
-        totalSales: { value: sales.length, change: 0 },
-        activeOrders: { value: orders.filter(o => o.status === 'ISSUED' || o.status === 'PAID').length, change: 0 },
-        totalProducts: { value: products.length, change: 0 },
-      });
+      setError(null);
+      const stats = await dashboardService.getStats();
+      setData(stats);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +35,25 @@ export const DashboardPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center p-8">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+            <TrendingDown className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <button className="btn btn-primary" onClick={loadDashboardData}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) {
+      return null;
+  }
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -61,9 +65,9 @@ export const DashboardPage = () => {
             <span className="text-sm text-gray-600">LIVE DATA</span>
           </div>
         </div>
-        <button className="btn btn-primary gap-2">
+        <button className="btn btn-primary gap-2" onClick={loadDashboardData}>
           <TrendingUp className="w-4 h-4" />
-          Export Report
+          Refresh Report
         </button>
       </div>
 
@@ -71,32 +75,32 @@ export const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KPICard
           title="Total Revenue"
-          value={`$${kpis.totalRevenue.value.toFixed(2)}`}
-          change={kpis.totalRevenue.change}
+          value={`$${data.total_revenue.value.toFixed(2)}`}
+          change={data.total_revenue.change}
           icon={DollarSign}
           iconColor="text-green-600"
           iconBg="bg-green-100"
         />
         <KPICard
           title="Total Sales"
-          value={kpis.totalSales.value.toString()}
-          change={kpis.totalSales.change}
+          value={data.total_sales.value.toString()}
+          change={data.total_sales.change}
           icon={ShoppingCart}
           iconColor="text-purple-600"
           iconBg="bg-purple-100"
         />
         <KPICard
           title="Active Orders"
-          value={kpis.activeOrders.value.toString()}
-          change={kpis.activeOrders.change}
+          value={data.active_orders.value.toString()}
+          change={data.active_orders.change}
           icon={Package}
           iconColor="text-orange-600"
           iconBg="bg-orange-100"
         />
         <KPICard
           title="Total Products"
-          value={kpis.totalProducts.value.toString()}
-          change={kpis.totalProducts.change}
+          value={data.total_products.value.toString()}
+          change={data.total_products.change}
           icon={Users}
           iconColor="text-blue-600"
           iconBg="bg-blue-100"
@@ -109,16 +113,22 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Monthly Earnings Trend</h2>
-              <p className="text-sm text-gray-600">Revenue performance over the last 6 months</p>
+              <p className="text-sm text-gray-600">Revenue performance over time</p>
             </div>
-            <select className="select select-bordered select-sm">
-              <option>Last 6 Months</option>
-              <option>Last 12 Months</option>
-              <option>This Year</option>
-            </select>
           </div>
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            <p>Chart data coming soon...</p>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.earnings_trend}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
+                <Tooltip 
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -128,57 +138,37 @@ export const DashboardPage = () => {
             <h2 className="text-xl font-bold text-gray-900">Top Selling Products</h2>
             <p className="text-sm text-gray-600">By sales volume</p>
           </div>
-          <div className="flex items-center justify-center h-64 text-gray-500">
-            <p>Product data coming soon...</p>
+          <div className="space-y-4">
+              {data.top_products.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No sales data yet.</p>
+              ) : (
+                  data.top_products.map((product) => (
+                    <div key={product.barcode} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500">
+                                {product.barcode.slice(-2)}
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-900 truncate w-32" title={product.description}>{product.description}</p>
+                                <p className="text-xs text-gray-500">{product.quantity_sold} sold</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="font-medium text-gray-900">${product.revenue.toFixed(2)}</p>
+                        </div>
+                    </div>
+                  ))
+              )}
           </div>
         </div>
       </div>
 
-      {/* Recent Reports */}
-      <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Recent Analytics Reports</h2>
-          <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-            View History
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th>REPORT NAME</th>
-                <th>GENERATED DATE</th>
-                <th>DATA PERIOD</th>
-                <th>STATUS</th>
-                <th>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Q3 Sales Performance.pdf</td>
-                <td>Oct 12, 2023</td>
-                <td>Jul - Sep 2023</td>
-                <td><span className="badge badge-success">COMPLETED</span></td>
-                <td><button className="btn btn-ghost btn-xs">Download</button></td>
-              </tr>
-              <tr>
-                <td>Inventory Forecast_Oct.csv</td>
-                <td>Oct 08, 2023</td>
-                <td>Oct - Dec 2023</td>
-                <td><span className="badge badge-success">COMPLETED</span></td>
-                <td><button className="btn btn-ghost btn-xs">Download</button></td>
-              </tr>
-              <tr>
-                <td>Monthly Audit Log_Sep.pdf</td>
-                <td>Oct 01, 2023</td>
-                <td>Sep 01 - Sep 30</td>
-                <td><span className="badge badge-warning">ARCHIVED</span></td>
-                <td><button className="btn btn-ghost btn-xs">Download</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Recent Reports (Backend part not implemented yet, using placeholder or could remove) */}
+       {/* Keeping it as static for now as requested by user "dashboard must show real data" - I will hide it or put a note? 
+           User request "tutti i dati" (all data) implies real data. 
+           Since I don't have real reports, maybe I should remove this section to avoid showing fake data.
+           I will remove it to be safe and strictly follow "real data". 
+       */}
     </div>
   );
 };

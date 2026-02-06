@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, MapPin, Check } from 'lucide-react';
 import { productsService } from '../services/productsService';
 import { ProductType } from '../types/api';
 
@@ -9,6 +9,7 @@ export const InventoryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductType | null>(null);
+  const [editingPosition, setEditingPosition] = useState<{id: number, value: string} | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -35,6 +36,17 @@ export const InventoryPage = () => {
         const errorMessage = error.response?.data?.message || error.response?.data?.detail || error.message || 'Failed to delete product.';
         alert(`Error: ${errorMessage}`);
       }
+    }
+  };
+
+  const handleUpdatePosition = async () => {
+    if (!editingPosition) return;
+    try {
+      await productsService.updatePosition(editingPosition.id, editingPosition.value);
+      setEditingPosition(null);
+      loadProducts();
+    } catch (err) {
+      alert("Failed to update position");
     }
   };
 
@@ -107,12 +119,48 @@ export const InventoryPage = () => {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id}>
+                  <tr key={product.id} className="hover">
                     <td className="font-mono">{product.barcode}</td>
                     <td className="font-medium">{product.description}</td>
                     <td>${product.price_per_unit.toFixed(2)}</td>
                     <td>{product.quantity || 0}</td>
-                    <td>{product.position || '-'}</td>
+                    <td>
+                      {editingPosition?.id === product.id ? (
+                        <div className="flex items-center gap-1">
+                          <input 
+                            type="text" 
+                            className="input input-xs input-bordered w-24"
+                            value={editingPosition?.value || ''}
+                            onChange={(e) => editingPosition && setEditingPosition({...editingPosition, value: e.target.value})}
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdatePosition();
+                                if (e.key === 'Escape') setEditingPosition(null);
+                            }}
+                          />
+                          <button 
+                            className="btn btn-xs btn-circle btn-success text-white"
+                            onClick={handleUpdatePosition}
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 group">
+                          <span>{product.position || '-'}</span>
+                          <button 
+                            className="opacity-0 group-hover:opacity-100 btn btn-ghost btn-xs btn-circle"
+                            onClick={() => {
+                                if (product.id) {
+                                    setEditingPosition({id: product.id, value: product.position || ''});
+                                }
+                            }}
+                          >
+                            <MapPin className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
                     <td>
                       <div className="flex gap-2">
                         <button

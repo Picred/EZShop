@@ -1,38 +1,136 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Download, Eye } from 'lucide-react';
+import { Plus, Search, Filter, Download, CheckCircle, DollarSign } from 'lucide-react';
 import { ordersService } from '../services/ordersService';
-import { Order, OrderStatus } from '../types/api';
+import { productsService } from '../services/productsService';
+import { Order, OrderStatus, ProductType } from '../types/api';
 
 type TabType = 'all' | 'issued' | 'paid' | 'completed';
 
 export const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    product_barcode: '',
+    quantity: 1,
+    price_per_unit: 0
+  });
 
   useEffect(() => {
-    loadOrders();
+    loadData();
   }, []);
 
-  const loadOrders = async () => {
+  const loadData = async () => {
     try {
-      const data = await ordersService.getAll();
-      setOrders(data);
+      setLoading(true);
+      const [ordersData, productsData] = await Promise.all([
+        ordersService.getAll(),
+        productsService.getAll()
+      ]);
+      setOrders(ordersData);
+      setProducts(productsData);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCreateOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await ordersService.create({
+        product_barcode: formData.product_barcode,
+        quantity: Number(formData.quantity),
+        price_per_unit: Number(formData.price_per_unit)
+      } as Order);
+      
+      setIsModalOpen(false);
+      setFormData({ product_barcode: '', quantity: 1, price_per_unit: 0 });
+      loadData();
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      alert('Failed to create order');
+    }
+  };
+
+  const handlePayOrder = async (id: number | undefined) => {
+      if (!id) return;
+      try {
+          await ordersService.pay(id);
+          loadData();
+      } catch (error: any) {
+          const message = error.response?.data?.message || error.message || "Failed to pay order";
+          console.error("Failed to pay order", error);
+          alert(message);
+      }
+  }
+
+  const handleRecordArrival = async (id: number | undefined) => {
+      if (!id) return;
+      try {
+          await ordersService.recordArrival(id);
+          loadData();
+      } catch (error: any) {
+          const message = error.response?.data?.message || error.message || "Failed to record arrival";
+          console.error("Failed to record arrival", error);
+          alert(message);
+      }
+  }
+
   const filteredOrders = orders.filter((order) => {
+    // 1. Tab Filter
     const matchesTab =
       activeTab === 'all' ||
-      order.status?.toLowerCase() === activeTab.toUpperCase();
-    const matchesSearch = order.product_barcode.includes(searchTerm);
-    return matchesTab && matchesSearch;
+      order.status?.toLowerCase() === activeTab.toLowerCase();
+    
+    // 2. Search Filter (ID, Barcode)
+    const normalizedSearch = searchTerm.toLowerCase();
+    const orderIdMatch = order.id?.toString() === normalizedSearch || `#${order.id}` === normalizedSearch;
+    const barcodeMatch = order.product_barcode.includes(searchTerm);
+    const matchesSearch = searchTerm === '' || orderIdMatch || barcodeMatch;
+
+    // 3. Status Extra Filter
+    const matchesStatusFilter = 
+      statusFilter === 'ALL' || 
+      order.status === statusFilter;
+
+    return matchesTab && matchesSearch && matchesStatusFilter;
   });
+
+  const handleExport = () => {
+    if (filteredOrders.length === 0) return;
+    
+    const headers = ['Order ID', 'Product', 'Quantity', 'Status', 'Total Price', 'Issue Date'];
+    const rows = filteredOrders.map(o => [
+        o.id,
+        o.product_barcode,
+        o.quantity,
+        o.status,
+        (o.quantity * o.price_per_unit).toFixed(2),
+        o.issue_date
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(r => r.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `orders_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getStatusBadge = (status?: OrderStatus) => {
     const badges = {
@@ -43,6 +141,15 @@ export const OrdersPage = () => {
     return badges[status || 'ISSUED'];
   };
 
+  const handleProductChange = (barcode: string) => {
+      const product = products.find(p => p.barcode === barcode);
+      setFormData({
+          ...formData,
+          product_barcode: barcode,
+          price_per_unit: product ? product.price_per_unit : 0
+      });
+  }
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -51,7 +158,10 @@ export const OrdersPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
           <p className="text-gray-600 mt-1">Track and manage procurement orders with your suppliers</p>
         </div>
-        <button className="btn btn-primary gap-2">
+        <button 
+            className="btn btn-primary gap-2"
+            onClick={() => setIsModalOpen(true)}
+        >
           <Plus className="w-4 h-4" />
           Create New Order
         </button>
@@ -97,11 +207,23 @@ export const OrdersPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="btn btn-outline gap-2">
-          <Filter className="w-4 h-4" />
-          Filter
-        </button>
-        <button className="btn btn-outline gap-2">
+        <div className="dropdown">
+            <button tabIndex={0} className="btn btn-outline gap-2">
+                <Filter className="w-4 h-4" />
+                {statusFilter === 'ALL' ? 'Filter' : statusFilter}
+            </button>
+            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li onClick={() => setStatusFilter('ALL')}><a>All Statuses</a></li>
+                <li onClick={() => setStatusFilter('ISSUED')}><a>ISSUED</a></li>
+                <li onClick={() => setStatusFilter('PAID')}><a>PAID</a></li>
+                <li onClick={() => setStatusFilter('COMPLETED')}><a>COMPLETED</a></li>
+            </ul>
+        </div>
+        <button 
+            className="btn btn-outline gap-2"
+            onClick={handleExport}
+            disabled={filteredOrders.length === 0}
+        >
           <Download className="w-4 h-4" />
           Export
         </button>
@@ -115,7 +237,6 @@ export const OrdersPage = () => {
               <tr>
                 <th>ORDER ID</th>
                 <th>PRODUCT</th>
-                <th>SUPPLIER</th>
                 <th>QUANTITY</th>
                 <th>STATUS</th>
                 <th>TOTAL PRICE</th>
@@ -125,13 +246,13 @@ export const OrdersPage = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8">
+                  <td colSpan={6} className="text-center py-8">
                     <span className="loading loading-spinner loading-lg"></span>
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-500">
+                  <td colSpan={6} className="text-center py-8 text-gray-500">
                     No orders found
                   </td>
                 </tr>
@@ -140,7 +261,6 @@ export const OrdersPage = () => {
                   <tr key={order.id}>
                     <td className="font-mono">#{order.id}</td>
                     <td>{order.product_barcode}</td>
-                    <td>-</td>
                     <td>{order.quantity}</td>
                     <td>
                       <span className={`badge ${getStatusBadge(order.status)}`}>
@@ -148,10 +268,25 @@ export const OrdersPage = () => {
                       </span>
                     </td>
                     <td>${(order.quantity * order.price_per_unit).toFixed(2)}</td>
-                    <td>
-                      <button className="btn btn-ghost btn-xs">
-                        <Eye className="w-4 h-4" />
-                      </button>
+                    <td className="flex gap-2">
+                        {order.status === 'ISSUED' && (
+                             <button 
+                                className="btn btn-xs btn-info" 
+                                onClick={() => handlePayOrder(order.id)}
+                                title="Mark as Paid"
+                             >
+                                <DollarSign className="w-3 h-3" /> Pay
+                             </button>
+                        )}
+                        {order.status === 'PAID' && (
+                            <button 
+                                className="btn btn-xs btn-success" 
+                                onClick={() => handleRecordArrival(order.id)}
+                                title="Record Arrival"
+                            >
+                                <CheckCircle className="w-3 h-3" /> Receive
+                            </button>
+                        )}
                     </td>
                   </tr>
                 ))
@@ -172,7 +307,9 @@ export const OrdersPage = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">ACTIVE ORDERS</p>
-              <p className="text-2xl font-bold text-gray-900">12</p>
+              <p className="text-2xl font-bold text-gray-900">
+                  {orders.filter(o => o.status === 'ISSUED').length}
+              </p>
             </div>
           </div>
         </div>
@@ -185,7 +322,9 @@ export const OrdersPage = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">PENDING PAYMENT</p>
-              <p className="text-2xl font-bold text-gray-900">4</p>
+              <p className="text-2xl font-bold text-gray-900">
+                  {orders.filter(o => o.status === 'ISSUED').length}
+              </p>
             </div>
           </div>
         </div>
@@ -197,12 +336,80 @@ export const OrdersPage = () => {
               </svg>
             </div>
             <div>
-              <p className="text-sm text-gray-600">RECEIVED MONTHLY</p>
-              <p className="text-2xl font-bold text-gray-900">48</p>
+              <p className="text-sm text-gray-600">COMPLETED</p>
+              <p className="text-2xl font-bold text-gray-900">
+                  {orders.filter(o => o.status === 'COMPLETED').length}
+              </p>
             </div>
           </div>
         </div>
       </div>
+
+       {/* Create Order Modal */}
+       {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">Create New Order</h3>
+            <form onSubmit={handleCreateOrder}>
+              <div className="form-control w-full mb-4">
+                <label className="label">
+                  <span className="label-text">Product</span>
+                </label>
+                <select 
+                    className="select select-bordered w-full"
+                    value={formData.product_barcode}
+                    onChange={(e) => handleProductChange(e.target.value)}
+                    required
+                >
+                    <option value="">Select a product</option>
+                    {products.map(p => (
+                        <option key={p.id} value={p.barcode}>{p.description} ({p.barcode})</option>
+                    ))}
+                </select>
+              </div>
+              <div className="form-control w-full mb-4">
+                <label className="label">
+                  <span className="label-text">Quantity</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  className="input input-bordered w-full"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                  required
+                />
+              </div>
+              <div className="form-control w-full mb-4">
+                <label className="label">
+                  <span className="label-text">Price per Unit</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  className="input input-bordered w-full"
+                  value={formData.price_per_unit}
+                  onChange={(e) => setFormData({ ...formData, price_per_unit: parseFloat(e.target.value) })}
+                  required
+                />
+              </div>
+              <div className="modal-action">
+                <button 
+                  type="button" 
+                  className="btn btn-ghost"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Create Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

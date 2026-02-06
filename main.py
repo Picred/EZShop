@@ -21,6 +21,7 @@ from app.routes import (
     returns_route,
     sales_route,
     user_route,
+    dashboard_route,
 )
 
 logger = getLogger(__name__)
@@ -39,7 +40,7 @@ app = FastAPI(title="EZShop", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # should allow all origins for dev purposes
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,6 +56,7 @@ app.include_router(sales_route.router)
 app.include_router(orders_route.router)
 app.include_router(accounting_route.router)
 app.include_router(returns_route.router)
+app.include_router(dashboard_route.router)
 
 app.add_exception_handler(AppError, error_handler)
 app.add_exception_handler(Exception, error_handler)

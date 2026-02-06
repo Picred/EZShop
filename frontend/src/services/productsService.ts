@@ -37,4 +37,10 @@ export const productsService = {
     const response = await api.get<ProductType>(`/products/barcode/${barcode}`);
     return response.data;
   },
+
+  async updatePosition(id: number, position: string): Promise<void> {
+    await api.patch(`/products/${id}/position`, null, {
+      params: { position }
+    });
+  },
 };

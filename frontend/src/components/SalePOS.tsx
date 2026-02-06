@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Plus, Minus, Trash, CreditCard, ShoppingCart } from 'lucide-react';
+import { X, Search, Plus, Minus, Trash, ShoppingCart, DollarSign } from 'lucide-react';
 import { Sale, ProductType } from '../types/api';
 import { salesService } from '../services/salesService';
 import { productsService } from '../services/productsService';
@@ -139,7 +139,8 @@ export const SalePOS = ({ sale: initialSale, onClose, onUpdate }: SalePOSProps) 
       onUpdate();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Payment failed');
+      const msg = err.response?.data?.message || err.message || 'Payment failed';
+      setError(msg);
       setTimeout(() => setError(''), 3000);
       await loadSale();
     } finally {
@@ -348,7 +349,7 @@ export const SalePOS = ({ sale: initialSale, onClose, onUpdate }: SalePOSProps) 
                     disabled={!currentSale.lines || currentSale.lines.length === 0 || loading || currentSale.status === 'PAID'}
                     onClick={() => setShowPayment(true)}
                 >
-                    <CreditCard className="w-5 h-5" />
+                    <DollarSign className="w-5 h-5" />
                     Process Payment
                 </button>
              )}
