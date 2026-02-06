@@ -5,6 +5,9 @@ from app.models.DTO.user_dto import UserDTO
 from app.repositories.user_repository import UserRepository
 from app.models.user_type import UserType
 from datetime import datetime, timedelta, timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 def generate_token(user: UserDTO) -> str:
     payload = {
@@ -16,38 +19,49 @@ def generate_token(user: UserDTO) -> str:
 
 
 async def process_token(auth_header: str, allowed_roles: list[UserType] = []):
+    logger.info(f"[AUTH] Processing token, auth_header: {auth_header[:50]}...")
     token = extract_bearer_token(auth_header)
+    logger.info(f"[AUTH] Extracted token: {token[:50]}...")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         role = payload.get("role")
+        logger.info(f"[AUTH] Token decoded successfully, username: {username}, role: {role}")
 
         if not username:
+            logger.error("[AUTH] No username in token payload")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
         user_repo = UserRepository()
         user_dao = await user_repo.get_user_by_username(username)
 
         if not user_dao:
+            logger.error(f"[AUTH] User not found in database: {username}")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
         if allowed_roles and user_dao.type not in allowed_roles:
+            logger.error(f"[AUTH] User {username} has role {user_dao.type}, but needs one of {allowed_roles}")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient rights")
 
+        logger.info(f"[AUTH] Authentication successful for user: {username}")
         return user_dao
 
     except jwt.ExpiredSignatureError:
+        logger.error("[AUTH] Token expired")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
     except jwt.InvalidTokenError as e:
+        logger.error(f"[AUTH] Invalid token: {str(e)}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {str(e)}")
 
 
 def extract_bearer_token(auth_header: str) -> str:
     if not auth_header:
+        logger.error("[AUTH] No auth header provided")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No token provided")
 
     parts = auth_header.split(" ")
     if len(parts) != 2 or parts[0] != "Bearer":
+        logger.error(f"[AUTH] Invalid token format: {auth_header}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token format")
 
     return parts[1]
