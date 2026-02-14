@@ -115,6 +115,9 @@ ezshop/
 - Customer data privacy is enforced through authentication and authorization
 - The system maintains ACID properties for financial transactions
 
+## Screenshot (frontend dashboard)
+![EzShop Dashboard](frontend/public/ezshop-dashboard.jpg)
+
 ## Troubleshooting
 
 ### Logs
@@ -125,3 +128,4 @@ Check the console output for detailed error messages and request logging.
 Developed as part of the Software Engineering course project. Based on the EZShop requirements document by Maurizio Morisio.
 
 *For detailed API specifications, please refer to the interactive Swagger documentation at `/docs` when the server is running.*
+
